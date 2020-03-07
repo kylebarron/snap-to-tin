@@ -21,5 +21,10 @@
   "bugs": {
     "url": "https://github.com/kylebarron/snap-features-to-mesh/issues"
   },
-  "homepage": "https://github.com/kylebarron/snap-features-to-mesh#readme"
+  "homepage": "https://github.com/kylebarron/snap-features-to-mesh#readme",
+  "dependencies": {
+    "@turf/helpers": "^6.1.4",
+    "@turf/invariant": "^6.1.2",
+    "rbush": "^3.0.1"
+  }
 }
