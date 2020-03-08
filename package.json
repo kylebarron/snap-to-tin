@@ -4,7 +4,8 @@
   "description": "Add z-coordinates to tiled vector features on the fly",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
   },
   "repository": {
     "type": "git",
@@ -33,5 +34,9 @@
     "barycentric": "^1.0.1",
     "lodash": "^4.17.15",
     "rbush": "^3.0.1"
+  },
+  "devDependencies": {
+    "rollup": "^2.0.2",
+    "rollup-plugin-terser": "^5.2.0"
   }
 }
