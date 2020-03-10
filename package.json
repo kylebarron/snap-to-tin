@@ -1,7 +1,7 @@
 {
   "name": "@kylebarron/snap-features-to-terrain",
   "version": "0.1.0",
-  "description": "Add z-coordinates to tiled vector features on the fly",
+  "description": "Add z-coordinates to vector features on the fly",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,7 +15,8 @@
     "terrain-tiles",
     "terrain",
     "terrain-mesh",
-    "vector-tiles"
+    "vector-tiles",
+    "triangular-mesh"
   ],
   "author": "Kyle Barron (https://kylebarron.dev)",
   "license": "MIT",

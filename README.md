@@ -1,6 +1,6 @@
 # snap-features-to-terrain
 
-Add z-coordinates to tiled vector features on the fly
+Add z-coordinates to vector features on the fly.
 
 ## Overview
 
