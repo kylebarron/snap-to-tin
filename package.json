@@ -32,6 +32,7 @@
     "@turf/invariant": "^6.1.2",
     "@turf/line-intersect": "^6.0.2",
     "barycentric": "^1.0.1",
+    "fast-deep-equal": "^3.1.1",
     "lodash": "^4.17.15",
     "rbush": "^3.0.1"
   },
