@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/kylebarron/snap-features-to-mesh#readme",
   "dependencies": {
-    "@deck.gl/core": "^8.0.17",
     "@turf/bbox": "^6.0.1",
     "@turf/boolean-crosses": "^6.0.1",
     "@turf/boolean-point-in-polygon": "^6.0.1",
