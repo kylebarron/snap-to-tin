@@ -1,4 +1,4 @@
-# snap-features-to-terrain
+# snap-features-to-tin
 
 Snap vector features to the faces of a triangulated irregular network (TIN).
 
@@ -20,9 +20,9 @@ new vertex is added to the resulting `LineString`, so that every part of the
 ## Install
 
 ```bash
-yarn add @kylebarron/snap-features-to-terrain
+yarn add @kylebarron/snap-features-to-tin
 # or
-npm install @kylebarron/snap-features-to-terrain
+npm install @kylebarron/snap-features-to-tin
 ```
 
 ## Usage
@@ -42,7 +42,7 @@ same coordinate system.**
 ### Example
 
 ```js
-import {snapFeatures} from '@kylebarron/snap-features-to-terrain'
+import {snapFeatures} from '@kylebarron/snap-features-to-tin'
 import {load} from '@loaders.gl/core';
 import {TerrainLoader} from '@loaders.gl/terrain';
 

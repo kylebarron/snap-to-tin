@@ -1,5 +1,5 @@
 {
-  "name": "@kylebarron/snap-features-to-terrain",
+  "name": "@kylebarron/snap-features-to-tin",
   "version": "0.1.0",
   "description": "Snap vector features to the faces of a triangulated irregular network (TIN).",
   "main": "lib/index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kylebarron/snap-features-to-terrain.git"
+    "url": "git+https://github.com/kylebarron/snap-features-to-tin.git"
   },
   "keywords": [
     "terrain-tiles",
@@ -21,9 +21,9 @@
   "author": "Kyle Barron (https://kylebarron.dev)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kylebarron/snap-features-to-terrain/issues"
+    "url": "https://github.com/kylebarron/snap-features-to-tin/issues"
   },
-  "homepage": "https://github.com/kylebarron/snap-features-to-terrain#readme",
+  "homepage": "https://github.com/kylebarron/snap-features-to-tin#readme",
   "dependencies": {
     "@turf/bbox": "^6.0.1",
     "@turf/bbox-clip": "^6.0.3",
