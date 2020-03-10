@@ -1,11 +1,11 @@
 # snap-features-to-terrain
 
-Add z-coordinates to vector features on the fly.
+Snap vector features to the faces of a triangulated irregular network (TIN).
 
 ## Overview
 
-Given a triangular irregular network (TIN) representing a terrain mesh, this
-snaps 2D `Point` and `LineString` features to that mesh.
+Given a TIN representing a terrain mesh, this snaps 2D `Point` and `LineString`
+features to the faces of that mesh.
 
 For `Point` features, this finds the triangle containing that point and linearly
 interpolates from the heights of the triangle's vertices to find the point's
