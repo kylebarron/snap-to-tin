@@ -25,6 +25,7 @@
   "homepage": "https://github.com/kylebarron/snap-features-to-mesh#readme",
   "dependencies": {
     "@turf/bbox": "^6.0.1",
+    "@turf/bbox-clip": "^6.0.3",
     "@turf/boolean-crosses": "^6.0.1",
     "@turf/boolean-point-in-polygon": "^6.0.1",
     "@turf/helpers": "^6.1.4",
