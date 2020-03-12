@@ -4,7 +4,7 @@ import {
   floatIsClose,
   lineLineIntersection,
   lineTriangleIntersect
-} from "../lib/geom";
+} from "../src/geom";
 
 describe("pointOnLine", () => {
   test("between", () => {
