@@ -1,5 +1,5 @@
 import barycentric from "barycentric";
-import { PointZ, Point, Triangle, TriangleZ, LineSegment } from "./types";
+import { PointZ, Point, TriangleZ, LineSegment } from "./types";
 
 // a, b, c must be arrays of three elements
 // point must be an array of two elements
@@ -9,10 +9,7 @@ export function interpolateTriangle(
   triangle: TriangleZ,
   point: Point
 ): PointZ | null {
-  const [a, b, c] = triangle.slice(0, 3);
-  const [ax, ay, az] = a;
-  const [bx, by, bz] = b;
-  const [cx, cy, cz] = c;
+  const [ax, ay, az, bx, by, bz, cx, cy, cz] = triangle;
 
   // Find the mix of a, b, and c to use
   const mix: number[] = barycentric(
@@ -51,9 +48,9 @@ export function interpolateEdge(
   point: Point
 ): PointZ | null {
   // loop over each edge until you find one where the point is on the line
-  for (let i = 0; i < triangle.length - 1; i++) {
-    const start = triangle[i];
-    const end = triangle[i + 1];
+  for (const edge of triangleToEdges(triangle)) {
+    const start = edge[0];
+    const end = edge[1];
 
     const onLine = pointOnLine(start, end, point);
     if (!onLine) continue;
@@ -130,30 +127,46 @@ export function lineLineIntersection(
   return [x, y];
 }
 
-// line is [a, b]
-// triangle is [x, y, z, x]
-// where all of the above are 2-tuples
 // Test line-line intersection among line and each edge of the triangle
 export function lineTriangleIntersect(
   line: LineSegment,
-  triangle: Triangle
+  triangle: TriangleZ
 ): Point[] {
   // loop over each edge
   const intersectionPoints = [];
-  for (let i = 0; i < triangle.length - 1; i++) {
-    const edge = [triangle[i], triangle[i + 1]];
+  for (const edge of triangleToEdges(triangle)) {
     const intersectionPoint = lineLineIntersection(
       line[0],
       line[1],
       edge[0],
       edge[1]
     );
-
     if (intersectionPoint) {
       intersectionPoints.push(intersectionPoint);
     }
   }
   return intersectionPoints;
+}
+
+export function* triangleToEdges(triangle: TriangleZ) {
+  for (let i = 0; i < 3; i++) {
+    let edge = [];
+    if (i === 0) {
+      edge.push(triangleVertex(0, triangle));
+      edge.push(triangleVertex(1, triangle));
+    } else if (i === 1) {
+      edge.push(triangleVertex(1, triangle));
+      edge.push(triangleVertex(2, triangle));
+    } else if (i === 2) {
+      edge.push(triangleVertex(2, triangle));
+      edge.push(triangleVertex(0, triangle));
+    }
+    yield edge;
+  }
+}
+
+export function triangleVertex(i, triangle) {
+  return triangle.subarray(i * 3, (i + 1) * 3);
 }
 
 // Split line into desired number of segments

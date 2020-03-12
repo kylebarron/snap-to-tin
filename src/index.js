@@ -1,6 +1,5 @@
 import { getType } from "@turf/invariant";
 import bboxClip from "@turf/bbox-clip";
-import isPointInPolygon from "@turf/boolean-point-in-polygon";
 import uniqBy from "lodash.uniqby";
 import orderBy from "lodash.orderby";
 import equals from "fast-deep-equal";
@@ -78,6 +77,7 @@ export function snapFeatures(options = {}) {
 function handlePoint(point, index, triangles) {
   // Search index for point
   const [x, y] = point.slice(0, 2);
+  // array of TypedArrays of length 9
   const results = index
     .search(x, y, x, y)
     .map(i => triangles.subarray(i * 9, (i + 1) * 9));
@@ -85,17 +85,18 @@ function handlePoint(point, index, triangles) {
   // Find true positives from rtree results
   // Since I'm working with triangles and not square boxes, it's possible that a point could be
   // inside the triangle's bounding box but outside the triangle itself.
+  // array of TypedArrays of length 9
   const filteredResults = results.filter(result => {
-    const a = [result[0], result[1]]
-    const b = [result[3], result[4]]
-    const c = [result[6], result[7]]
+    const a = [result[0], result[1]];
+    const b = [result[3], result[4]];
+    const c = [result[6], result[7]];
     if (pointInTriangle(point, a, b, c)) return result;
   });
 
   // Now linearly interpolate elevation within this triangle
-  const triangle = filteredResults[0].geometry.coordinates[0];
-  const interpolatedPoint = interpolateTriangle(triangle, point);
-  return interpolatedPoint;
+  // TypedArray of length 9
+  const triangle = filteredResults[0];
+  return interpolateTriangle(triangle, point);
 }
 
 // Add coordinates for LineString
@@ -115,17 +116,16 @@ function handleLineString(line, index, triangles) {
 
     // Find edges that this line segment crosses
     // First search in rtree. This is fast but has false-positives
-    const results = searchLineInIndex({ line: lineSegment, index }).map(
-      i => triangles[i]
+    // array of TypedArrays of length 9
+    const results = searchLineInIndex({ line: lineSegment, index }).map(i =>
+      triangles.subarray(i * 9, (i + 1) * 9)
     );
 
     // Find points where line crosses edges
     // intersectionPoints is Array([x, y, z])
     // Note that intersectionPoints has 2x duplicates!
     // This is because every edge crossed is part of two triangles!
-    const intersectionPoints = results.flatMap(result => {
-      const triangle = result.geometry.coordinates[0];
-
+    const intersectionPoints = results.flatMap(triangle => {
       // Rename:
       const intersectionPoints = lineTriangleIntersect(lineSegment, triangle);
       if (!intersectionPoints || intersectionPoints.length === 0) return [];
