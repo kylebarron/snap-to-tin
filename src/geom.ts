@@ -1,16 +1,22 @@
 import barycentric from "barycentric";
+import { PointZ, Point, Triangle, TriangleZ, LineSegment } from "./types";
 
 // a, b, c must be arrays of three elements
 // point must be an array of two elements
 // TODO: add tests where you assert that the interpolated z is above the min vertex height and below
 // the max vertex height
-export function interpolateTriangle(a, b, c, point) {
+export function interpolateTriangle(
+  a: PointZ,
+  b: PointZ,
+  c: PointZ,
+  point: Point
+): PointZ {
   const [ax, ay, az] = a;
   const [bx, by, bz] = b;
   const [cx, cy, cz] = c;
 
   // Find the mix of a, b, and c to use
-  const mix = barycentric(
+  const mix: number[] = barycentric(
     [
       [ax, ay],
       [bx, by],
@@ -29,7 +35,7 @@ export function interpolateTriangle(a, b, c, point) {
 // Can be much faster than working with barycentric coordinates
 // triangle is [a, b, c, d], where each vertex is (x, y, z)
 // point is (x, y)
-export function interpolateEdge(triangle, point) {
+export function interpolateEdge(triangle: TriangleZ, point: Point): PointZ {
   // loop over each edge until you find one where the point is on the line
   for (let i = 0; i < triangle.length - 1; i++) {
     const start = triangle[i];
@@ -46,27 +52,40 @@ export function interpolateEdge(triangle, point) {
 }
 
 // https://stackoverflow.com/a/11912171
-export function pointOnLine(a, b, point) {
+export function pointOnLine(
+  a: Point | PointZ,
+  b: Point | PointZ,
+  point: Point | PointZ
+): boolean {
   return floatIsClose(
     distanceLine(a, point) + distanceLine(b, point) - distanceLine(a, b),
     0
   );
 }
 
-export function distanceLine(a, b) {
+export function distanceLine(a: number[], b: number[]): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
   return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 }
 
-export function floatIsClose(a, b, eps = 1e-10) {
+export function floatIsClose(
+  a: number,
+  b: number,
+  eps: number = 1e-10
+): boolean {
   return Math.abs(a - b) < eps;
 }
 
 // Modfied slightly from https://stackoverflow.com/a/24392281
 // returns intersection point if the line from a->b intersects with c->d
 // Otherwise returns false
-export function lineLineIntersection(a, b, c, d) {
+export function lineLineIntersection(
+  a: Point,
+  b: Point,
+  c: Point,
+  d: Point
+): Point | boolean {
   // ∆x1 * ∆y2 - ∆x2 * ∆y1
   const det = (b[0] - a[0]) * (d[1] - c[1]) - (d[0] - c[0]) * (b[1] - a[1]);
   if (det === 0) {
@@ -99,7 +118,10 @@ export function lineLineIntersection(a, b, c, d) {
 // triangle is [x, y, z, x]
 // where all of the above are 2-tuples
 // Test line-line intersection among line and each edge of the triangle
-export function lineTriangleIntersect(line, triangle) {
+export function lineTriangleIntersect(
+  line: LineSegment,
+  triangle: Triangle
+): Point[] {
   // loop over each edge
   const intersectionPoints = [];
   for (let i = 0; i < triangle.length - 1; i++) {
