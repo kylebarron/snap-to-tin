@@ -12,6 +12,6 @@ const config = (file, plugins = []) => ({
 });
 
 export default [
-    config('snap-features-to-mesh.js'),
-    config('snap-features-to-mesh.min.js', [terser()])
+    config('dist/snap-features-to-mesh.js'),
+    config('dist/snap-features-to-mesh.min.js', [terser()])
 ];
