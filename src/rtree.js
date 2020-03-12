@@ -1,6 +1,7 @@
 import { polygon as Polygon } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import Flatbush from "flatbush";
+import { splitLine } from "./geom";
 
 // Get triangles from terrain
 export function constructRTree(indices, positions) {
@@ -19,17 +20,6 @@ export function constructRTree(indices, positions) {
 
   // perform the indexing
   index.finish();
-
-  // Compute area of index bounds
-  index.area = null;
-  if (
-    index.minX !== Infinity &&
-    index.minY !== Infinity &&
-    index.maxX !== -Infinity &&
-    index.maxY !== -Infinity
-  ) {
-    index.area = (index.maxX - index.minX) * (index.maxY - index.minY);
-  }
   return [index, triangles];
 }
 
@@ -55,29 +45,45 @@ function createTriangles(indices, positions) {
 
 // Reduce total area searched in rtree to reduce false positives
 export function searchLineInIndex(options = {}) {
-  const { index, minX, minY, maxX, maxY, maxPctArea = 0.01 } = options;
+  const { index, line, maxPctArea = 0.01 } = options;
 
-  // Amount of area I'm searching
-  const searchArea = (maxX - minX) * (maxY - minY);
-
-  // Number of segments to split up search into
-  let nSegments = 1;
-  if (index.area !== null) {
-    const pctSearch = searchArea / index.area;
-    nSegments = Math.ceil(pctSearch / maxPctArea);
-  }
+  const indexArea = getIndexArea({ index });
+  const nSegments = getNumLineSegments({ line, indexArea, maxPctArea });
+  const lineSegments = splitLine({ line, nSegments });
 
   const resultIndices = new Set();
-  for (let i = 0; i < nSegments; i++) {
-    // _i_th part of the way from min to max
-    const thisMinX = minX + (i / nSegments) * (maxX - minX);
-    const thisMaxX = minX + ((i + 1) / nSegments) * (maxX - minX);
-    const thisMinY = minY + (i / nSegments) * (maxY - minY);
-    const thisMaxY = minY + ((i + 1) / nSegments) * (maxY - minY);
+  for (const lineSegment of lineSegments) {
+    const [minX, minY] = lineSegment[0];
+    const [maxX, maxY] = lineSegment[1];
     index
-      .search(thisMinX, thisMinY, thisMaxX, thisMaxY)
+      .search(minX, minY, maxX, maxY)
       .forEach(item => resultIndices.add(item));
   }
 
   return Array.from(resultIndices);
+}
+
+export function getIndexArea({ index }) {
+  area = null;
+  if (
+    index.minX !== Infinity &&
+    index.minY !== Infinity &&
+    index.maxX !== -Infinity &&
+    index.maxY !== -Infinity
+  ) {
+    area = (index.maxX - index.minX) * (index.maxY - index.minY);
+  }
+  return area;
+}
+
+export function getNumLineSegments({ line, indexArea, maxPctArea = 0.01 }) {
+  if (!indexArea) {
+    return 1;
+  }
+
+  const [minX, minY] = line[0];
+  const [maxX, maxY] = line[1];
+  const searchArea = (maxX - minX) * (maxY - minY);
+  const pctSearch = searchArea / indexArea;
+  return Math.ceil(pctSearch / maxPctArea);
 }

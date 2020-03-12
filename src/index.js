@@ -123,11 +123,7 @@ function handleLineString(line, index, triangles) {
 
     // Find edges that this line segment crosses
     // First search in rtree. This is fast but has false-positives
-    const minX = Math.min(start[0], end[0]);
-    const minY = Math.min(start[1], end[1]);
-    const maxX = Math.max(start[0], end[0]);
-    const maxY = Math.max(start[1], end[1]);
-    const results = searchLineInIndex({ index, minX, minY, maxX, maxY }).map(
+    const results = searchLineInIndex({ line: lineSegment, index }).map(
       i => triangles[i]
     );
 

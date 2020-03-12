@@ -139,3 +139,23 @@ export function lineTriangleIntersect(
   }
   return intersectionPoints;
 }
+
+// Split line into desired number of segments
+export function splitLine({ line, nSegments }) {
+  const [start, end] = line;
+  const lineSegments = [];
+
+  for (let i = 0; i < nSegments; i++) {
+    // _i_th part of the way from min to max
+    const a = start[0] + (i / nSegments) * (end[0] - start[0]);
+    const b = start[1] + (i / nSegments) * (end[1] - start[1]);
+    const c = start[0] + ((i + 1) / nSegments) * (end[0] - start[0]);
+    const d = start[1] + ((i + 1) / nSegments) * (end[1] - start[1]);
+    lineSegments.push([
+      [a, b],
+      [c, d]
+    ]);
+  }
+
+  return lineSegments;
+}
