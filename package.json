@@ -37,6 +37,7 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
+    "jest": "^25.1.0",
     "rollup": "^2.0.2",
     "rollup-plugin-terser": "^5.2.0"
   }
