@@ -11,6 +11,25 @@ import {
 } from "./geom";
 import { constructRTree, searchLineInIndex } from "./rtree";
 
+// var equals = require('fast-deep-equal/es6');
+// const Flatbush = require('flatbush');
+// var Polygon = require('@turf/helpers').polygon
+// var LineString = require('@turf/helpers').lineString
+// var Feature = require('@turf/helpers').feature
+// var Point = require('@turf/helpers').point
+// var {getType} = require('@turf/invariant')
+// var bbox = require('@turf/bbox').default
+// var bboxClip = require("@turf/bbox-clip").default;
+//
+// var isPointInPolygon = require('@turf/boolean-point-in-polygon').default
+// var barycentric = require("barycentric")
+// var _ = require('lodash')
+//
+// var terrain = require('./data/terrain.json')
+// var indices = new Uint32Array(Object.values(terrain.indices.value))
+// var positions = new Float32Array(Object.values(terrain.attributes.POSITION.value))
+// var features = require('./data/features.json')
+
 export function snapFeatures(options = {}) {
   const { indices, positions, features, bounds = null } = options;
 
@@ -106,7 +125,13 @@ function handlePoint(point, index, triangles) {
   return interpolatedPoint;
 }
 
-// Add coordinates for LineString
+/**
+ * Snap LineString to TIN faces
+ * @param  {[type]} line      [description]
+ * @param  {[type]} index     [description]
+ * @param  {[type]} triangles [description]
+ * @return {Array[PointZ]} LineString with z elevations on each coordinate
+ */
 function handleLineString(line, index, triangles) {
   let coordsWithZ = [];
 

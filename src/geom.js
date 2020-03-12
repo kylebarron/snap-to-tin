@@ -25,10 +25,13 @@ export function interpolateTriangle(a, b, c, point) {
   return [point[0], point[1], interpolatedZ];
 }
 
-// Interpolate when point is known to be on triangle edge
-// Can be much faster than working with barycentric coordinates
-// triangle is [a, b, c, d], where each vertex is (x, y, z)
-// point is (x, y)
+/**
+ * Interpolate when point is known to be on triangle edge
+ * Can be much faster than working with barycentric coordinates
+ * @param  {PointZ[]} triangle [description]
+ * @param  {Point} point    [description]
+ * @return {PointZ}          [description]
+ */
 export function interpolateEdge(triangle, point) {
   // loop over each edge until you find one where the point is on the line
   for (let i = 0; i < triangle.length - 1; i++) {
