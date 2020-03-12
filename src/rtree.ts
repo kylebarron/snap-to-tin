@@ -5,7 +5,7 @@ import { splitLine } from "./geom";
 import { LineSegment } from "./types";
 
 // Get triangles from terrain
-export function constructRTree(indices, positions) {
+export function constructRTree(indices: Int32Array, positions: Float32Array) {
   // Create list of objects for insertion into RTree
   const triangles = createTriangles(indices, positions);
 
@@ -24,7 +24,7 @@ export function constructRTree(indices, positions) {
   return [index, triangles];
 }
 
-function createTriangles(indices, positions) {
+function createTriangles(indices: Int32Array, positions: Float32Array) {
   const triangles = [];
   for (let i = 0; i < indices.length; i += 3) {
     // The indices within `positions` of the three vertices of the triangle
@@ -33,9 +33,9 @@ function createTriangles(indices, positions) {
     const cIndex = indices[i + 2];
 
     // The three vertices of the triangle, where each vertex is an array of [x, y, z]
-    const a = positions.subarray(aIndex * 3, (aIndex + 1) * 3);
-    const b = positions.subarray(bIndex * 3, (bIndex + 1) * 3);
-    const c = positions.subarray(cIndex * 3, (cIndex + 1) * 3);
+    const a = Array.from(positions.subarray(aIndex * 3, (aIndex + 1) * 3));
+    const b = Array.from(positions.subarray(bIndex * 3, (bIndex + 1) * 3));
+    const c = Array.from(positions.subarray(cIndex * 3, (cIndex + 1) * 3));
 
     // Create polygon from these coords
     const geom = Polygon([[a, b, c, a]]);
