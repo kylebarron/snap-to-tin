@@ -1,5 +1,7 @@
 # snap-features-to-tin
 
+[![Build Status](https://travis-ci.org/kylebarron/snap-features-to-tin.svg?branch=master)](https://travis-ci.org/kylebarron/snap-features-to-tin)
+
 Snap vector features to the faces of a triangulated irregular network (TIN).
 
 ## Overview
