@@ -181,3 +181,46 @@ export function splitLine({
 
   return lineSegments;
 }
+
+export function triangleToBounds(triangle: Float32Array): number[] {
+  if (triangle.length !== 9) {
+    throw new Error(`Incorrect length of triangle: ${triangle.length}`);
+  }
+
+  const minX = Math.min(triangle[0], triangle[3], triangle[6]);
+  const maxX = Math.max(triangle[0], triangle[3], triangle[6]);
+  const minY = Math.min(triangle[1], triangle[4], triangle[7]);
+  const maxY = Math.max(triangle[1], triangle[4], triangle[7]);
+  return [minX, minY, maxX, maxY];
+}
+
+// From https://stackoverflow.com/a/2049712
+// And this linked jsfiddle: http://jsfiddle.net/PerroAZUL/zdaY8/1/
+export function pointInTriangle(
+  p: number[],
+  p0: number[],
+  p1: number[],
+  p2: number[]
+): boolean {
+  const A =
+    (1 / 2) *
+    (-p1[1] * p2[0] +
+      p0[1] * (-p1[0] + p2[0]) +
+      p0[0] * (p1[1] - p2[1]) +
+      p1[0] * p2[1]);
+  const sign = A < 0 ? -1 : 1;
+  const s =
+    (p0[1] * p2[0] -
+      p0[0] * p2[1] +
+      (p2[1] - p0[1]) * p[0] +
+      (p0[0] - p2[0]) * p[1]) *
+    sign;
+  const t =
+    (p0[0] * p1[1] -
+      p0[1] * p1[0] +
+      (p0[1] - p1[1]) * p[0] +
+      (p1[0] - p0[0]) * p[1]) *
+    sign;
+
+  return s > 0 && t > 0 && s + t < 2 * A * sign;
+}

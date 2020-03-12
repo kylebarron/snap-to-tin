@@ -7,7 +7,8 @@ import equals from "fast-deep-equal";
 import {
   interpolateTriangle,
   interpolateEdge,
-  lineTriangleIntersect
+  lineTriangleIntersect,
+  pointInTriangle
 } from "./geom";
 import { constructRTree, searchLineInIndex } from "./rtree";
 
@@ -77,23 +78,19 @@ export function snapFeatures(options = {}) {
 function handlePoint(point, index, triangles) {
   // Search index for point
   const [x, y] = point.slice(0, 2);
-  const results = index.search(x, y, x, y).map(i => triangles[i]);
+  const results = index
+    .search(x, y, x, y)
+    .map(i => triangles.subarray(i * 9, (i + 1) * 9));
 
-  // Check each result
+  // Find true positives from rtree results
   // Since I'm working with triangles and not square boxes, it's possible that a point could be
   // inside the triangle's bounding box but outside the triangle itself.
   const filteredResults = results.filter(result => {
-    if (isPointInPolygon(point, result)) return result;
+    const a = [result[0], result[1]]
+    const b = [result[3], result[4]]
+    const c = [result[6], result[7]]
+    if (pointInTriangle(point, a, b, c)) return result;
   });
-
-  // if (filteredResults.length > 1) {
-  //   console.log(`${filteredResults.length} results from point in polygon search`)
-  // }
-  //
-  // if (filteredResults.length === 0) {
-  //   console.log('no results')
-  //   console.log(point)
-  // }
 
   // Now linearly interpolate elevation within this triangle
   const triangle = filteredResults[0].geometry.coordinates[0];
