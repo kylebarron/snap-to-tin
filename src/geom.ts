@@ -1,11 +1,16 @@
 import barycentric from "barycentric";
-import {PointZ, Point, Triangle, TriangleZ, LineSegment} from "./types"
+import { PointZ, Point, Triangle, TriangleZ, LineSegment } from "./types";
 
 // a, b, c must be arrays of three elements
 // point must be an array of two elements
 // TODO: add tests where you assert that the interpolated z is above the min vertex height and below
 // the max vertex height
-export function interpolateTriangle(a: PointZ, b: PointZ, c: PointZ, point: Point): PointZ {
+export function interpolateTriangle(
+  a: PointZ,
+  b: PointZ,
+  c: PointZ,
+  point: Point
+): PointZ {
   const [ax, ay, az] = a;
   const [bx, by, bz] = b;
   const [cx, cy, cz] = c;
@@ -47,7 +52,11 @@ export function interpolateEdge(triangle: TriangleZ, point: Point): PointZ {
 }
 
 // https://stackoverflow.com/a/11912171
-function pointOnLine(a: Point | PointZ, b: Point | PointZ, point: Point | PointZ): boolean {
+function pointOnLine(
+  a: Point | PointZ,
+  b: Point | PointZ,
+  point: Point | PointZ
+): boolean {
   return floatIsClose(
     distanceLine(a, point) + distanceLine(b, point) - distanceLine(a, b),
     0
@@ -67,7 +76,12 @@ function floatIsClose(a: number, b: number, eps: number = 1e-10): boolean {
 // Modfied slightly from https://stackoverflow.com/a/24392281
 // returns intersection point if the line from a->b intersects with c->d
 // Otherwise returns false
-function lineLineIntersection(a: Point, b: Point, c: Point, d: Point): Point | boolean {
+function lineLineIntersection(
+  a: Point,
+  b: Point,
+  c: Point,
+  d: Point
+): Point | boolean {
   // ∆x1 * ∆y2 - ∆x2 * ∆y1
   const det = (b[0] - a[0]) * (d[1] - c[1]) - (d[0] - c[0]) * (b[1] - a[1]);
   if (det === 0) {
@@ -100,7 +114,10 @@ function lineLineIntersection(a: Point, b: Point, c: Point, d: Point): Point | b
 // triangle is [x, y, z, x]
 // where all of the above are 2-tuples
 // Test line-line intersection among line and each edge of the triangle
-export function lineTriangleIntersect(line: LineSegment, triangle: Triangle): Point[] {
+export function lineTriangleIntersect(
+  line: LineSegment,
+  triangle: Triangle
+): Point[] {
   // loop over each edge
   const intersectionPoints = [];
   for (let i = 0; i < triangle.length - 1; i++) {
