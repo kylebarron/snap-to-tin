@@ -31,6 +31,7 @@
     "@turf/boolean-point-in-polygon": "^6.0.1",
     "@turf/helpers": "^6.1.4",
     "@turf/invariant": "^6.1.2",
+    "@types/flatbush": "^3.1.0",
     "barycentric": "^1.0.1",
     "fast-deep-equal": "^3.1.1",
     "flatbush": "^3.2.0",

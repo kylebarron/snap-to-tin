@@ -141,7 +141,13 @@ export function lineTriangleIntersect(
 }
 
 // Split line into desired number of segments
-export function splitLine({ line, nSegments }) {
+export function splitLine({
+  line,
+  nSegments
+}: {
+  line: LineSegment;
+  nSegments: number;
+}): LineSegment[] {
   const [start, end] = line;
   const lineSegments = [];
 

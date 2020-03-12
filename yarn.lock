@@ -1035,6 +1035,11 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
+"@types/flatbush@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/flatbush/-/flatbush-3.1.0.tgz#a9d5aefb5d93fa52ed5e8248f3962cf576765e74"
+  integrity sha512-5FCxpEtOUAkvg+taiVO73WR6Xuhgplo+hJ4rSdNrKKjkIFuH/ZZQtnCC3ybY0+ipSBfOnQ3l3/6qJHZJTRGjwA==
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.1.tgz#42995b446db9a48a11a07ec083499a860e9138ff"
