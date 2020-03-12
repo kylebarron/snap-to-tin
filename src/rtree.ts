@@ -95,5 +95,5 @@ export function getNumLineSegments(options): number {
   const [maxX, maxY] = line[1];
   const searchArea = (maxX - minX) * (maxY - minY);
   const pctSearch = searchArea / indexArea;
-  return Math.ceil(pctSearch / maxPctArea);
+  return Math.max(1, Math.ceil(pctSearch / maxPctArea));
 }
