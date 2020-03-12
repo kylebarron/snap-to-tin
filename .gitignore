@@ -1,5 +1,6 @@
 lib/data/
 src/data/
+lib/
 
 # Logs
 logs
