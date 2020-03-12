@@ -1,10 +1,116 @@
 import {
+  interpolateTriangle,
+  interpolateEdge,
   pointOnLine,
   distanceLine,
   floatIsClose,
   lineLineIntersection,
-  lineTriangleIntersect
+  lineTriangleIntersect,
+  splitLine
 } from "../src/geom";
+
+describe('interpolateTriangle', () => {
+  test('interpolates correctly on edge', () => {
+    const triangle = [
+      [0, 0, 10],
+      [0, 1, 20],
+      [1, 0, 30],
+      [0, 0, 10]
+    ];
+    const point = [0, 0.5];
+    const result = interpolateTriangle(triangle, point);
+    expect(result).toStrictEqual([0, 0.5, 15]);
+  })
+
+  test("interpolates correctly at vertex", () => {
+    const triangle = [
+      [0, 0, 10],
+      [0, 1, 20],
+      [1, 0, 30],
+      [0, 0, 10]
+    ];
+    const point = [0, 0];
+    const result = interpolateTriangle(triangle, point);
+    expect(result).toStrictEqual([0, 0, 10]);
+  });
+
+  test("interpolates correctly inside triangle", () => {
+    // equilateral triangle with length 2 on each side
+    const triangle = [
+      [0, 0, 10],
+      [1, Math.sqrt(3), 20],
+      [2, 0, 30],
+      [0, 0, 10]
+    ];
+    // Middle of triangle
+    const point = [1, Math.sqrt(3) / 2];
+    const result = interpolateTriangle(triangle, point);
+    expect(result).toStrictEqual([1, Math.sqrt(3) / 2, 20]);
+  });
+
+
+  test("returns null for point not on edge, outside triangle", () => {
+    const triangle = [
+      [0, 0, 10],
+      [0, 1, 20],
+      [1, 0, 30],
+      [0, 0, 10]
+    ];
+    const point = [10, 10];
+    const result = interpolateTriangle(triangle, point);
+    expect(result).toBeNull();
+  });
+})
+
+describe("interpolateEdge", () => {
+  test("interpolates correctly on edge", () => {
+    const triangle = [
+      [0, 0, 10],
+      [0, 1, 20],
+      [1, 0, 30],
+      [0, 0, 10]
+    ];
+    const point = [0, 0.5];
+    const result = interpolateEdge(triangle, point);
+    expect(result).toStrictEqual([0, 0.5, 15]);
+  });
+
+  test("interpolates correctly at vertex", () => {
+    const triangle = [
+      [0, 0, 10],
+      [0, 1, 20],
+      [1, 0, 30],
+      [0, 0, 10]
+    ];
+    const point = [0, 0];
+    const result = interpolateEdge(triangle, point);
+    expect(result).toStrictEqual([0, 0, 10]);
+  });
+
+  test("returns null for point not on edge, outside triangle", () => {
+    const triangle = [
+      [0, 0, 10],
+      [0, 1, 20],
+      [1, 0, 30],
+      [0, 0, 10]
+    ];
+    const point = [10, 10];
+    const result = interpolateEdge(triangle, point);
+    expect(result).toBeNull();
+  });
+
+  test("returns null for point not on edge, inside triangle", () => {
+    const triangle = [
+      [0, 0, 10],
+      [0, 1, 20],
+      [1, 0, 30],
+      [0, 0, 10]
+    ];
+    const point = [0.25, 0.25];
+    const result = interpolateEdge(triangle, point);
+    expect(result).toBeNull();
+  });
+});
 
 describe("pointOnLine", () => {
   test("between", () => {
@@ -266,5 +372,58 @@ describe("lineTriangleIntersect", () => {
     ];
     const result = lineTriangleIntersect(line, triangle);
     expect(result).toStrictEqual([[0, 0]]);
+  });
+});
+
+describe("splitLine", () => {
+  test("returns self when split into one segment", () => {
+    const line = [
+      [0, 0],
+      [1, 1]
+    ];
+    const nSegments = 1;
+    const result = splitLine({ line, nSegments });
+    expect(result).toContainEqual([
+      [0, 0],
+      [1, 1]
+    ]);
+  });
+
+  test("splits into segments", () => {
+    const line = [
+      [0, 0],
+      [1, 1]
+    ];
+    const nSegments = 2;
+    const result = splitLine({ line, nSegments });
+    expect(result).toContainEqual([
+      [0, 0],
+      [0.5, 0.5]
+    ]);
+    expect(result).toContainEqual([
+      [0.5, 0.5],
+      [1, 1]
+    ]);
+  });
+
+  test("splits into 3 segments", () => {
+    const line = [
+      [0, 0],
+      [1, 1]
+    ];
+    const nSegments = 3;
+    const result = splitLine({ line, nSegments });
+    expect(result).toContainEqual([
+      [0, 0],
+      [1 / 3, 1 / 3]
+    ]);
+    expect(result).toContainEqual([
+      [1 / 3, 1 / 3],
+      [2 / 3, 2 / 3]
+    ]);
+    expect(result).toContainEqual([
+      [2 / 3, 2 / 3],
+      [1, 1]
+    ]);
   });
 });

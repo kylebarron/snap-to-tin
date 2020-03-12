@@ -97,12 +97,7 @@ function handlePoint(point, index, triangles) {
 
   // Now linearly interpolate elevation within this triangle
   const triangle = filteredResults[0].geometry.coordinates[0];
-  const interpolatedPoint = interpolateTriangle(
-    triangle[0],
-    triangle[1],
-    triangle[2],
-    point
-  );
+  const interpolatedPoint = interpolateTriangle(triangle, point);
   return interpolatedPoint;
 }
 

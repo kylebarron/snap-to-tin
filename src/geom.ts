@@ -6,11 +6,10 @@ import { PointZ, Point, Triangle, TriangleZ, LineSegment } from "./types";
 // TODO: add tests where you assert that the interpolated z is above the min vertex height and below
 // the max vertex height
 export function interpolateTriangle(
-  a: PointZ,
-  b: PointZ,
-  c: PointZ,
+  triangle: TriangleZ,
   point: Point
-): PointZ {
+): PointZ | null {
+  const [a, b, c] = triangle.slice(0, 3);
   const [ax, ay, az] = a;
   const [bx, by, bz] = b;
   const [cx, cy, cz] = c;
@@ -25,6 +24,18 @@ export function interpolateTriangle(
     point.slice(0, 2)
   );
 
+  // If point is outside triangle, return null
+  if (
+    mix[0] < 0 ||
+    1 < mix[0] ||
+    mix[1] < 0 ||
+    1 < mix[1] ||
+    mix[2] < 0 ||
+    1 < mix[2]
+  ) {
+    return null;
+  }
+
   // Find the correct z based on that mix
   const interpolatedZ = mix[0] * az + mix[1] * bz + mix[2] * cz;
 
@@ -35,7 +46,10 @@ export function interpolateTriangle(
 // Can be much faster than working with barycentric coordinates
 // triangle is [a, b, c, d], where each vertex is (x, y, z)
 // point is (x, y)
-export function interpolateEdge(triangle: TriangleZ, point: Point): PointZ {
+export function interpolateEdge(
+  triangle: TriangleZ,
+  point: Point
+): PointZ | null {
   // loop over each edge until you find one where the point is on the line
   for (let i = 0; i < triangle.length - 1; i++) {
     const start = triangle[i];
@@ -49,6 +63,8 @@ export function interpolateEdge(triangle: TriangleZ, point: Point): PointZ {
     const z = start[2] + pctAlong * (end[2] - start[2]);
     return [point[0], point[1], z];
   }
+
+  return null;
 }
 
 // https://stackoverflow.com/a/11912171
