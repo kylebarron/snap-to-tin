@@ -2,6 +2,7 @@ import { polygon as Polygon } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import Flatbush from "flatbush";
 import { splitLine } from "./geom";
+import { LineSegment } from "./types";
 
 // Get triangles from terrain
 export function constructRTree(indices, positions) {
@@ -43,15 +44,19 @@ function createTriangles(indices, positions) {
   return triangles;
 }
 
-// Reduce total area searched in rtree to reduce false positives
-export function searchLineInIndex(options = {}) {
-  const { index, line, maxPctArea = 0.01 } = options;
+export function searchLineInIndex(options): number[] {
+  const {
+    index,
+    line,
+    maxPctArea = 0.01
+  }: { index: Flatbush; line: LineSegment; maxPctArea?: number } = options;
 
+  // Reduce total area searched in rtree to reduce false positives
   const indexArea = getIndexArea({ index });
   const nSegments = getNumLineSegments({ line, indexArea, maxPctArea });
   const lineSegments = splitLine({ line, nSegments });
 
-  const resultIndices = new Set();
+  const resultIndices: Set<number> = new Set();
   for (const lineSegment of lineSegments) {
     const [minX, minY] = lineSegment[0];
     const [maxX, maxY] = lineSegment[1];
@@ -63,8 +68,8 @@ export function searchLineInIndex(options = {}) {
   return Array.from(resultIndices);
 }
 
-export function getIndexArea({ index }) {
-  area = null;
+export function getIndexArea({ index }: { index: Flatbush }): number | null {
+  let area = null;
   if (
     index.minX !== Infinity &&
     index.minY !== Infinity &&
@@ -76,7 +81,12 @@ export function getIndexArea({ index }) {
   return area;
 }
 
-export function getNumLineSegments({ line, indexArea, maxPctArea = 0.01 }) {
+export function getNumLineSegments(options): number {
+  const {
+    line,
+    indexArea,
+    maxPctArea = 0.01
+  }: { line: LineSegment; indexArea: number; maxPctArea?: number } = options;
   if (!indexArea) {
     return 1;
   }
