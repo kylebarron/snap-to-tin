@@ -37,6 +37,9 @@
     "lodash.uniqby": "^4.7.0"
   },
   "devDependencies": {
+    "@types/flatbush": "^3.1.0",
+    "@types/lodash.orderby": "^4.6.6",
+    "@types/lodash.uniqby": "^4.7.6",
     "rollup": "^2.0.2",
     "rollup-plugin-terser": "^5.2.0"
   }
