@@ -1,8 +1,6 @@
 import barycentric from "barycentric";
 import { PointZ, Point, TriangleZ, LineSegment } from "./types";
 
-// a, b, c must be arrays of three elements
-// point must be an array of two elements
 // TODO: add tests where you assert that the interpolated z is above the min vertex height and below
 // the max vertex height
 export function interpolateTriangle(
@@ -41,8 +39,6 @@ export function interpolateTriangle(
 
 // Interpolate when point is known to be on triangle edge
 // Can be much faster than working with barycentric coordinates
-// triangle is [a, b, c, d], where each vertex is (x, y, z)
-// point is (x, y)
 export function interpolateEdge(
   triangle: TriangleZ,
   point: Point

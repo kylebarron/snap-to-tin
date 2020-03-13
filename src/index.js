@@ -35,7 +35,9 @@ export function snapFeatures(options = {}) {
         }
       }
 
-      feature.geometry.coordinates = handlePoint(coord, index, triangles);
+      const newPoint = handlePoint(coord, index, triangles)
+      if (!newPoint) continue;
+      feature.geometry.coordinates = newPoint;
       newFeatures.push(feature);
     } else if (geometryType === "LineString") {
       // Instantiate clippedFeature in case bounds is null
@@ -87,11 +89,13 @@ function handlePoint(point, index, triangles) {
   // inside the triangle's bounding box but outside the triangle itself.
   // array of TypedArrays of length 9
   const filteredResults = results.filter(result => {
-    const a = [result[0], result[1]];
-    const b = [result[3], result[4]];
-    const c = [result[6], result[7]];
-    if (pointInTriangle(point, a, b, c)) return result;
+    if (pointInTriangle(point, result)) return result;
   });
+
+  // Not sure why this is sometimes empty after filtering??
+  if (filteredResults.length === 0) {
+    return null;
+  }
 
   // Now linearly interpolate elevation within this triangle
   // TypedArray of length 9
@@ -162,11 +166,12 @@ function handleLineString(line, index, triangles) {
     }
 
     const newStart = handlePoint(start, index, triangles);
-    coordsWithZ.push(newStart);
+    if (newStart) coordsWithZ.push(newStart);
     coordsWithZ = coordsWithZ.concat(sorted);
   }
 
   const endPoint = line.slice(-1)[0];
-  coordsWithZ.push(handlePoint(endPoint, index, triangles));
+  const newEnd = handlePoint(endPoint, index, triangles);
+  if (newEnd) coordsWithZ.push(newEnd);
   return coordsWithZ;
 }
