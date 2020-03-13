@@ -167,7 +167,7 @@ function handleLineString(line, index, triangles) {
 
     const newStart = handlePoint(start, index, triangles);
     if (newStart) coordsWithZ.push(newStart);
-    coordsWithZ = coordsWithZ.concat(sorted);
+    coordsWithZ.push.apply(sorted)
   }
 
   const endPoint = line.slice(-1)[0];
