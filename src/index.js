@@ -100,7 +100,7 @@ function handlePoint(point, index, triangles) {
   // Now linearly interpolate elevation within this triangle
   // TypedArray of length 9
   const triangle = filteredResults[0];
-  return interpolateTriangle(triangle, point);
+  return interpolateTriangle(point, triangle);
 }
 
 // Add coordinates for LineString

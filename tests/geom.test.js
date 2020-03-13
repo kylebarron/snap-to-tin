@@ -10,7 +10,8 @@ import {
   triangleVertex,
   splitLine,
   triangleToBounds,
-  pointInTriangle
+  pointInTriangle,
+  barycentric
 } from "../src/geom";
 
 describe("interpolateTriangle", () => {
@@ -22,7 +23,7 @@ describe("interpolateTriangle", () => {
       1, 0, 30
     ]);
     const point = [0, 0.5];
-    const result = interpolateTriangle(triangle, point);
+    const result = interpolateTriangle(point, triangle);
     expect(result).toStrictEqual([0, 0.5, 15]);
   });
 
@@ -34,7 +35,7 @@ describe("interpolateTriangle", () => {
       1, 0, 30
     ]);
     const point = [0, 0];
-    const result = interpolateTriangle(triangle, point);
+    const result = interpolateTriangle(point, triangle);
     expect(result).toStrictEqual([0, 0, 10]);
   });
 
@@ -48,7 +49,7 @@ describe("interpolateTriangle", () => {
     ]);
     // Middle of triangle
     const point = [1, Math.sqrt(3) / 2];
-    const result = interpolateTriangle(triangle, point);
+    const result = interpolateTriangle(point, triangle);
     expect(result).toStrictEqual([1, Math.sqrt(3) / 2, 20]);
   });
 
@@ -60,7 +61,7 @@ describe("interpolateTriangle", () => {
       1, 0, 30
     ]);
     const point = [10, 10];
-    const result = interpolateTriangle(triangle, point);
+    const result = interpolateTriangle(point, triangle);
     expect(result).toBeNull();
   });
 });
@@ -550,7 +551,7 @@ describe("pointInTriangle", () => {
 });
 
 describe("barycentric", () => {
-  test("interpolates correctly inside triangle", () => {
+  test("inside triangle", () => {
     // equilateral triangle with length 2 on each side
     // prettier-ignore
     const triangle = Float32Array.from([
@@ -560,7 +561,89 @@ describe("barycentric", () => {
     ]);
     // Middle of triangle
     const point = [1, Math.sqrt(3) / 2];
-    const result = interpolateTriangle(triangle, point);
-    expect(result).toStrictEqual([1, Math.sqrt(3) / 2, 20]);
+    const result = barycentric(point, triangle);
+    expect(floatIsClose(result[0], 0.25, 1e-7)).toBe(true);
+    expect(floatIsClose(result[1], 0.5, 1e-7)).toBe(true);
+    expect(floatIsClose(result[2], 0.25, 1e-7)).toBe(true);
+  });
+
+  test("on edge", () => {
+    // equilateral triangle with length 2 on each side
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      2, 0, 30,
+    ]);
+    // Middle of triangle
+    const point = [0, 1 / 2];
+    const result = barycentric(point, triangle);
+    expect(result[0]).toEqual(0.5);
+    expect(result[1]).toEqual(0.5);
+    expect(Math.abs(result[2])).toEqual(0);
+  });
+
+  test("outside triangle", () => {
+    // equilateral triangle with length 2 on each side
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      1, Math.sqrt(3), 20,
+      2, 0, 30,
+    ]);
+    // Middle of triangle
+    const point = [1, 2 * Math.sqrt(3)];
+    const result = barycentric(point, triangle);
+    expect(floatIsClose(result[0], -0.5, 1e-7)).toBe(true);
+    expect(floatIsClose(result[1], 2, 1e-7)).toBe(true);
+    expect(floatIsClose(result[2], -0.5, 1e-7)).toBe(true);
+  });
+
+  test("interpolates correctly first vertex", () => {
+    // equilateral triangle with length 2 on each side
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      1, Math.sqrt(3), 20,
+      2, 0, 30,
+    ]);
+    // Middle of triangle
+    const point = [0, 0];
+    const result = barycentric(point, triangle);
+    expect(result[0]).toEqual(1);
+    expect(Math.abs(result[1])).toEqual(0);
+    expect(Math.abs(result[2])).toEqual(0);
+  });
+
+  test("interpolates correctly second vertex", () => {
+    // equilateral triangle with length 2 on each side
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      1, Math.sqrt(3), 20,
+      2, 0, 30,
+    ]);
+    // Middle of triangle
+    const point = [1, Math.sqrt(3)];
+    const result = barycentric(point, triangle);
+    expect(floatIsClose(result[0], 0, 1e-7)).toBe(true);
+    expect(floatIsClose(result[1], 1, 1e-7)).toBe(true);
+    expect(floatIsClose(result[2], 0, 1e-7)).toBe(true);
+  });
+
+  test("interpolates correctly third vertex", () => {
+    // equilateral triangle with length 2 on each side
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      1, Math.sqrt(3), 20,
+      2, 0, 30,
+    ]);
+    // Middle of triangle
+    const point = [2, 0];
+    const result = barycentric(point, triangle);
+    expect(Math.abs(result[0])).toEqual(0);
+    expect(Math.abs(result[1])).toEqual(0);
+    expect(Math.abs(result[2])).toEqual(1);
   });
 });

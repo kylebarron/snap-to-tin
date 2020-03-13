@@ -3,8 +3,8 @@ import { PointZ, Point, TriangleZ, LineSegment } from "./types";
 // TODO: add tests where you assert that the interpolated z is above the min vertex height and below
 // the max vertex height
 export function interpolateTriangle(
+  point: Point,
   triangle: TriangleZ,
-  point: Point
 ): PointZ | null {
   const [ax, ay, az, bx, by, bz, cx, cy, cz] = triangle;
 
@@ -204,7 +204,7 @@ export function pointInTriangle(
 }
 
 // From https://stackoverflow.com/a/14382692
-export function barycentric(p, triangle) {
+export function barycentric(p: Point | PointZ, triangle: TriangleZ): number[] {
   const p0 = triangle.subarray(0, 3);
   const p1 = triangle.subarray(3, 6);
   const p2 = triangle.subarray(6, 9);
