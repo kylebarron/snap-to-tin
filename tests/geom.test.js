@@ -1,17 +1,17 @@
 import {
   interpolateTriangle,
   interpolateEdge,
-  pointOnLine,
-  distanceLine,
+  pointOnLine2d,
+  distanceLine2d,
   floatIsClose,
-  lineLineIntersection,
-  lineTriangleIntersect,
+  lineLineIntersection2d,
+  lineTriangleIntersect2d,
   triangleToEdges,
   triangleVertex,
-  splitLine,
+  splitLine2d,
   triangleToBounds,
-  pointInTriangle,
-  barycentric
+  pointInTriangle2d,
+  barycentric2d
 } from "../src/geom";
 
 describe("interpolateTriangle", () => {
@@ -116,61 +116,61 @@ describe("interpolateEdge", () => {
   });
 });
 
-describe("pointOnLine", () => {
+describe("pointOnLine2d", () => {
   test("between", () => {
     const a = [0, 0];
     const b = [1, 1];
     const point = [0.5, 0.5];
-    expect(pointOnLine(a, b, point)).toBe(true);
+    expect(pointOnLine2d(a, b, point)).toBe(true);
   });
 
   test("before", () => {
     const a = [0, 0];
     const b = [1, 1];
     const point = [-0.5, -0.5];
-    expect(pointOnLine(a, b, point)).toBe(false);
+    expect(pointOnLine2d(a, b, point)).toBe(false);
   });
 
   test("after", () => {
     const a = [0, 0];
     const b = [1, 1];
     const point = [1.5, 1.5];
-    expect(pointOnLine(a, b, point)).toBe(false);
+    expect(pointOnLine2d(a, b, point)).toBe(false);
   });
 
   test("on beginning endpoint", () => {
     const a = [0, 0];
     const b = [1, 1];
     const point = [0, 0];
-    expect(pointOnLine(a, b, point)).toBe(true);
+    expect(pointOnLine2d(a, b, point)).toBe(true);
   });
 
   test("on ending endpoint", () => {
     const a = [0, 0];
     const b = [1, 1];
     const point = [1, 1];
-    expect(pointOnLine(a, b, point)).toBe(true);
+    expect(pointOnLine2d(a, b, point)).toBe(true);
   });
 
   test("slightly off", () => {
     const a = [0, 0];
     const b = [1, 1];
     const point = [0.49999999999, 0.49999999999];
-    expect(pointOnLine(a, b, point)).toBe(true);
+    expect(pointOnLine2d(a, b, point)).toBe(true);
   });
 });
 
-describe("distanceLine", () => {
+describe("distanceLine2d", () => {
   test("simple calc", () => {
     const a = [0, 0];
     const b = [1, 1];
-    expect(distanceLine(a, b)).toBe(Math.sqrt(2));
+    expect(distanceLine2d(a, b)).toBe(Math.sqrt(2));
   });
 
   test("same point", () => {
     const a = [0, 0];
     const b = [0, 0];
-    expect(distanceLine(a, b)).toBe(0);
+    expect(distanceLine2d(a, b)).toBe(0);
   });
 });
 
@@ -188,13 +188,13 @@ describe("floatIsClose", () => {
   });
 });
 
-describe("lineLineIntersection", () => {
+describe("lineLineIntersection2d", () => {
   test("simple x", () => {
     const a = [0, 0];
     const b = [1, 1];
     const c = [0, 1];
     const d = [1, 0];
-    expect(lineLineIntersection(a, b, c, d)).toStrictEqual([0.5, 0.5]);
+    expect(lineLineIntersection2d(a, b, c, d)).toStrictEqual([0.5, 0.5]);
   });
 
   test("simple L; intersect at start endpoint", () => {
@@ -202,7 +202,7 @@ describe("lineLineIntersection", () => {
     const b = [0, 1];
     const c = [0, 0];
     const d = [1, 0];
-    expect(lineLineIntersection(a, b, c, d)).toStrictEqual([0, 0]);
+    expect(lineLineIntersection2d(a, b, c, d)).toStrictEqual([0, 0]);
   });
 
   test("simple L; intersect at end endpoint", () => {
@@ -210,7 +210,7 @@ describe("lineLineIntersection", () => {
     const b = [1, 1];
     const c = [1, 0];
     const d = [1, 1];
-    expect(lineLineIntersection(a, b, c, d)).toStrictEqual([1, 1]);
+    expect(lineLineIntersection2d(a, b, c, d)).toStrictEqual([1, 1]);
   });
 
   test("parallel lines", () => {
@@ -218,7 +218,7 @@ describe("lineLineIntersection", () => {
     const b = [0, 1];
     const c = [1, 0];
     const d = [1, 1];
-    expect(lineLineIntersection(a, b, c, d)).toBe(false);
+    expect(lineLineIntersection2d(a, b, c, d)).toBe(false);
   });
 
   test("overlapping lines", () => {
@@ -226,7 +226,7 @@ describe("lineLineIntersection", () => {
     const b = [0, 1];
     const c = [0, 0];
     const d = [0, 1];
-    expect(lineLineIntersection(a, b, c, d)).toBe(false);
+    expect(lineLineIntersection2d(a, b, c, d)).toBe(false);
   });
 
   test("intersect outside segments", () => {
@@ -234,11 +234,11 @@ describe("lineLineIntersection", () => {
     const b = [0, 1];
     const c = [2, -2];
     const d = [2, 2];
-    expect(lineLineIntersection(a, b, c, d)).toBe(false);
+    expect(lineLineIntersection2d(a, b, c, d)).toBe(false);
   });
 });
 
-describe("lineTriangleIntersect", () => {
+describe("lineTriangleIntersect2d", () => {
   test("intersect one edge only", () => {
     const line = [
       [0.25, 0.25],
@@ -250,7 +250,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     expect(result).toStrictEqual([[0.5, 0.5]]);
   });
 
@@ -265,7 +265,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     expect(result).toStrictEqual([
       [0, 0.5],
       [0.5, 0.5]
@@ -283,7 +283,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     expect(result).toStrictEqual([
       [0, 0.5],
       [0.5, 0.5]
@@ -301,7 +301,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     expect(result).toStrictEqual([
       [0, 0.5],
       [0.5, 0.5]
@@ -319,7 +319,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     // Note, currently returns duplicates
     expect(result).toStrictEqual([
       [0, 1],
@@ -338,7 +338,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     // Note, currently returns duplicates
     expect(result).toStrictEqual([
       [0, 1],
@@ -357,7 +357,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     // Counterintuitive at first, but this is desired behavior. See #23
     expect(result).toContainEqual([0, 0]);
     expect(result).toContainEqual([0, 1]);
@@ -374,7 +374,7 @@ describe("lineTriangleIntersect", () => {
       0, 1, 0,
       1, 0, 0
     ]);
-    const result = lineTriangleIntersect(line, triangle);
+    const result = lineTriangleIntersect2d(line, triangle);
     expect(result).toStrictEqual([[0, 0]]);
   });
 });
@@ -436,14 +436,14 @@ describe("triangleVertex", () => {
   });
 });
 
-describe("splitLine", () => {
+describe("splitLine2d", () => {
   test("returns self when split into one segment", () => {
     const line = [
       [0, 0],
       [1, 1]
     ];
     const nSegments = 1;
-    const result = splitLine({ line, nSegments });
+    const result = splitLine2d({ line, nSegments });
     expect(result).toContainEqual([
       [0, 0],
       [1, 1]
@@ -456,7 +456,7 @@ describe("splitLine", () => {
       [1, 1]
     ];
     const nSegments = 2;
-    const result = splitLine({ line, nSegments });
+    const result = splitLine2d({ line, nSegments });
     expect(result).toContainEqual([
       [0, 0],
       [0.5, 0.5]
@@ -473,7 +473,7 @@ describe("splitLine", () => {
       [1, 1]
     ];
     const nSegments = 3;
-    const result = splitLine({ line, nSegments });
+    const result = splitLine2d({ line, nSegments });
     expect(result).toContainEqual([
       [0, 0],
       [1 / 3, 1 / 3]
@@ -503,7 +503,7 @@ describe("triangleToBounds", () => {
   });
 });
 
-describe("pointInTriangle", () => {
+describe("pointInTriangle2d", () => {
   test("point on boundary", () => {
     // prettier-ignore
     const triangle = Float32Array.from([
@@ -512,7 +512,7 @@ describe("pointInTriangle", () => {
       1, 0, 30
     ]);
     const point = [0, 0.5];
-    const result = pointInTriangle(point, triangle);
+    const result = pointInTriangle2d(point, triangle);
     expect(result).toBe(true);
   });
   test("point at vertex", () => {
@@ -523,7 +523,7 @@ describe("pointInTriangle", () => {
       1, 0, 30
     ]);
     const point = [0, 0];
-    const result = pointInTriangle(point, triangle);
+    const result = pointInTriangle2d(point, triangle);
     expect(result).toBe(true);
   });
   test("point inside triangle", () => {
@@ -534,7 +534,7 @@ describe("pointInTriangle", () => {
       1, 0, 30
     ]);
     const point = [0.25, 0.25];
-    const result = pointInTriangle(point, triangle);
+    const result = pointInTriangle2d(point, triangle);
     expect(result).toBe(true);
   });
   test("point outside triangle", () => {
@@ -545,12 +545,12 @@ describe("pointInTriangle", () => {
       1, 0, 30
     ]);
     const point = [1, 1];
-    const result = pointInTriangle(point, triangle);
+    const result = pointInTriangle2d(point, triangle);
     expect(result).toBe(false);
   });
 });
 
-describe("barycentric", () => {
+describe("barycentric2d", () => {
   test("inside triangle", () => {
     // equilateral triangle with length 2 on each side
     // prettier-ignore
@@ -561,7 +561,7 @@ describe("barycentric", () => {
     ]);
     // Middle of triangle
     const point = [1, Math.sqrt(3) / 2];
-    const result = barycentric(point, triangle);
+    const result = barycentric2d(point, triangle);
     expect(floatIsClose(result[0], 0.25, 1e-7)).toBe(true);
     expect(floatIsClose(result[1], 0.5, 1e-7)).toBe(true);
     expect(floatIsClose(result[2], 0.25, 1e-7)).toBe(true);
@@ -577,7 +577,7 @@ describe("barycentric", () => {
     ]);
     // Middle of triangle
     const point = [0, 1 / 2];
-    const result = barycentric(point, triangle);
+    const result = barycentric2d(point, triangle);
     expect(result[0]).toEqual(0.5);
     expect(result[1]).toEqual(0.5);
     expect(Math.abs(result[2])).toEqual(0);
@@ -593,7 +593,7 @@ describe("barycentric", () => {
     ]);
     // Middle of triangle
     const point = [1, 2 * Math.sqrt(3)];
-    const result = barycentric(point, triangle);
+    const result = barycentric2d(point, triangle);
     expect(floatIsClose(result[0], -0.5, 1e-7)).toBe(true);
     expect(floatIsClose(result[1], 2, 1e-7)).toBe(true);
     expect(floatIsClose(result[2], -0.5, 1e-7)).toBe(true);
@@ -609,7 +609,7 @@ describe("barycentric", () => {
     ]);
     // Middle of triangle
     const point = [0, 0];
-    const result = barycentric(point, triangle);
+    const result = barycentric2d(point, triangle);
     expect(result[0]).toEqual(1);
     expect(Math.abs(result[1])).toEqual(0);
     expect(Math.abs(result[2])).toEqual(0);
@@ -625,7 +625,7 @@ describe("barycentric", () => {
     ]);
     // Middle of triangle
     const point = [1, Math.sqrt(3)];
-    const result = barycentric(point, triangle);
+    const result = barycentric2d(point, triangle);
     expect(floatIsClose(result[0], 0, 1e-7)).toBe(true);
     expect(floatIsClose(result[1], 1, 1e-7)).toBe(true);
     expect(floatIsClose(result[2], 0, 1e-7)).toBe(true);
@@ -641,7 +641,7 @@ describe("barycentric", () => {
     ]);
     // Middle of triangle
     const point = [2, 0];
-    const result = barycentric(point, triangle);
+    const result = barycentric2d(point, triangle);
     expect(Math.abs(result[0])).toEqual(0);
     expect(Math.abs(result[1])).toEqual(0);
     expect(Math.abs(result[2])).toEqual(1);
