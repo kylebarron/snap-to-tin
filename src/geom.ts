@@ -11,7 +11,7 @@ export function interpolateTriangle(
   const cz = triangle[8];
 
   // Find the mix of a, b, and c to use
-  const mix: number[] = barycentric(point, triangle);
+  const mix: number[] = barycentric2d(point, triangle);
 
   // If point is outside triangle, return null
   if (
@@ -42,11 +42,11 @@ export function interpolateEdge(
     const start = edge[0];
     const end = edge[1];
 
-    const onLine = pointOnLine(start, end, point);
+    const onLine = pointOnLine2d(start, end, point);
     if (!onLine) continue;
 
     // percent distance from start to end
-    const pctAlong = distanceLine(start, point) / distanceLine(start, end);
+    const pctAlong = distanceLine2d(start, point) / distanceLine2d(start, end);
     const z = start[2] + pctAlong * (end[2] - start[2]);
     return [point[0], point[1], z];
   }
@@ -55,18 +55,18 @@ export function interpolateEdge(
 }
 
 // https://stackoverflow.com/a/11912171
-export function pointOnLine(
+export function pointOnLine2d(
   a: Point | PointZ,
   b: Point | PointZ,
   point: Point | PointZ
 ): boolean {
   return floatIsClose(
-    distanceLine(a, point) + distanceLine(b, point) - distanceLine(a, b),
+    distanceLine2d(a, point) + distanceLine2d(b, point) - distanceLine2d(a, b),
     0
   );
 }
 
-export function distanceLine(a: number[], b: number[]): number {
+export function distanceLine2d(a: number[], b: number[]): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
   return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
@@ -83,7 +83,7 @@ export function floatIsClose(
 // Modfied slightly from https://stackoverflow.com/a/24392281
 // returns intersection point if the line from a->b intersects with c->d
 // Otherwise returns false
-export function lineLineIntersection(
+export function lineLineIntersection2d(
   a: Point,
   b: Point,
   c: Point,
@@ -118,14 +118,14 @@ export function lineLineIntersection(
 }
 
 // Test line-line intersection among line and each edge of the triangle
-export function lineTriangleIntersect(
+export function lineTriangleIntersect2d(
   line: LineSegment,
   triangle: TriangleZ
 ): Point[] {
   // loop over each edge
   const intersectionPoints = [];
   for (const edge of triangleToEdges(triangle)) {
-    const intersectionPoint = lineLineIntersection(
+    const intersectionPoint = lineLineIntersection2d(
       line[0],
       line[1],
       edge[0],
@@ -160,7 +160,7 @@ export function triangleVertex(i, triangle) {
 }
 
 // Split line into desired number of segments
-export function splitLine({
+export function splitLine2d({
   line,
   nSegments
 }: {
@@ -197,16 +197,19 @@ export function triangleToBounds(triangle: Float32Array): number[] {
   return [minX, minY, maxX, maxY];
 }
 
-export function pointInTriangle(
+export function pointInTriangle2d(
   p: Point | PointZ,
   triangle: TriangleZ
 ): boolean {
-  const [x, y, z] = barycentric(p, triangle);
+  const [x, y, z] = barycentric2d(p, triangle);
   return x >= 0 && y >= 0 && z >= 0;
 }
 
 // From https://stackoverflow.com/a/14382692
-export function barycentric(p: Point | PointZ, triangle: TriangleZ): number[] {
+export function barycentric2d(
+  p: Point | PointZ,
+  triangle: TriangleZ
+): number[] {
   const p0 = triangle.subarray(0, 3);
   const p1 = triangle.subarray(3, 6);
   const p2 = triangle.subarray(6, 9);

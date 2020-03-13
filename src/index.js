@@ -6,8 +6,8 @@ import equals from "fast-deep-equal";
 import {
   interpolateTriangle,
   interpolateEdge,
-  lineTriangleIntersect,
-  pointInTriangle
+  lineTriangleIntersect2d,
+  pointInTriangle2d
 } from "./geom";
 import { constructRTree, searchLineInIndex } from "./rtree";
 
@@ -35,7 +35,7 @@ export function snapFeatures(options = {}) {
         }
       }
 
-      const newPoint = handlePoint(coord, index, triangles)
+      const newPoint = handlePoint(coord, index, triangles);
       if (!newPoint) continue;
       feature.geometry.coordinates = newPoint;
       newFeatures.push(feature);
@@ -89,7 +89,7 @@ function handlePoint(point, index, triangles) {
   // inside the triangle's bounding box but outside the triangle itself.
   // array of TypedArrays of length 9
   const filteredResults = results.filter(result => {
-    if (pointInTriangle(point, result)) return result;
+    if (pointInTriangle2d(point, result)) return result;
   });
 
   // Not sure why this is sometimes empty after filtering??
@@ -131,7 +131,7 @@ function handleLineString(line, index, triangles) {
     // This is because every edge crossed is part of two triangles!
     const intersectionPoints = results.flatMap(triangle => {
       // Rename:
-      const intersectionPoints = lineTriangleIntersect(lineSegment, triangle);
+      const intersectionPoints = lineTriangleIntersect2d(lineSegment, triangle);
       if (!intersectionPoints || intersectionPoints.length === 0) return [];
 
       // Otherwise, has an intersection point(s)
@@ -167,7 +167,7 @@ function handleLineString(line, index, triangles) {
 
     const newStart = handlePoint(start, index, triangles);
     if (newStart) coordsWithZ.push(newStart);
-    coordsWithZ.push.apply(sorted)
+    coordsWithZ.push.apply(sorted);
   }
 
   const endPoint = line.slice(-1)[0];

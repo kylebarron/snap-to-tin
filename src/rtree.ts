@@ -1,5 +1,5 @@
 import Flatbush from "flatbush";
-import { splitLine, triangleToBounds } from "./geom";
+import { splitLine2d, triangleToBounds } from "./geom";
 import { LineSegment } from "./types";
 
 // Get triangles from terrain
@@ -58,7 +58,7 @@ export function searchLineInIndex(options): number[] {
   // Reduce total area searched in rtree to reduce false positives
   const indexArea = getIndexArea({ index });
   const nSegments = getNumLineSegments({ line, indexArea, maxPctArea });
-  const lineSegments = splitLine({ line, nSegments });
+  const lineSegments = splitLine2d({ line, nSegments });
 
   const resultIndices: Set<number> = new Set();
   for (const lineSegment of lineSegments) {
