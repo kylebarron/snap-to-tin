@@ -1,7 +1,5 @@
 import { PointZ, Point, TriangleZ, LineSegment } from "./types";
 
-// TODO: add tests where you assert that the interpolated z is above the min vertex height and below
-// the max vertex height
 export function interpolateTriangle(
   point: Point,
   triangle: TriangleZ
