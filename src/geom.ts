@@ -4,12 +4,14 @@ import { PointZ, Point, TriangleZ, LineSegment } from "./types";
 // the max vertex height
 export function interpolateTriangle(
   point: Point,
-  triangle: TriangleZ,
+  triangle: TriangleZ
 ): PointZ | null {
-  const [ax, ay, az, bx, by, bz, cx, cy, cz] = triangle;
+  const az = triangle[2];
+  const bz = triangle[5];
+  const cz = triangle[8];
 
   // Find the mix of a, b, and c to use
-  const mix: number[] = barycentric(point.slice(0, 2), triangle);
+  const mix: number[] = barycentric(point, triangle);
 
   // If point is outside triangle, return null
   if (
