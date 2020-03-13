@@ -548,3 +548,19 @@ describe("pointInTriangle", () => {
     expect(result).toBe(false);
   });
 });
+
+describe("barycentric", () => {
+  test("interpolates correctly inside triangle", () => {
+    // equilateral triangle with length 2 on each side
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      1, Math.sqrt(3), 20,
+      2, 0, 30,
+    ]);
+    // Middle of triangle
+    const point = [1, Math.sqrt(3) / 2];
+    const result = interpolateTriangle(triangle, point);
+    expect(result).toStrictEqual([1, Math.sqrt(3) / 2, 20]);
+  });
+});

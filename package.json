@@ -26,13 +26,10 @@
   },
   "homepage": "https://github.com/kylebarron/snap-features-to-tin#readme",
   "dependencies": {
-    "@turf/bbox": "^6.0.1",
     "@turf/bbox-clip": "^6.0.3",
-    "@turf/boolean-point-in-polygon": "^6.0.1",
     "@turf/helpers": "^6.1.4",
     "@turf/invariant": "^6.1.2",
     "@types/flatbush": "^3.1.0",
-    "barycentric": "^1.0.1",
     "fast-deep-equal": "^3.1.1",
     "flatbush": "^3.2.0",
     "lodash.orderby": "^4.6.0",

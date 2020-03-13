@@ -1,4 +1,3 @@
-import barycentric from "barycentric";
 import { PointZ, Point, TriangleZ, LineSegment } from "./types";
 
 // TODO: add tests where you assert that the interpolated z is above the min vertex height and below
@@ -10,14 +9,7 @@ export function interpolateTriangle(
   const [ax, ay, az, bx, by, bz, cx, cy, cz] = triangle;
 
   // Find the mix of a, b, and c to use
-  const mix: number[] = barycentric(
-    [
-      [ax, ay],
-      [bx, by],
-      [cx, cy]
-    ],
-    point.slice(0, 2)
-  );
+  const mix: number[] = barycentric(point.slice(0, 2), triangle);
 
   // If point is outside triangle, return null
   if (
@@ -203,36 +195,39 @@ export function triangleToBounds(triangle: Float32Array): number[] {
   return [minX, minY, maxX, maxY];
 }
 
-// From https://stackoverflow.com/a/2049712
-// And this linked jsfiddle: http://jsfiddle.net/PerroAZUL/zdaY8/1/
 export function pointInTriangle(
   p: Point | PointZ,
   triangle: TriangleZ
 ): boolean {
+  const [x, y, z] = barycentric(p, triangle);
+  return x >= 0 && y >= 0 && z >= 0;
+}
+
+// From https://stackoverflow.com/a/14382692
+export function barycentric(p, triangle) {
   const p0 = triangle.subarray(0, 3);
   const p1 = triangle.subarray(3, 6);
   const p2 = triangle.subarray(6, 9);
 
-  const A =
-    (1 / 2) *
+  const area =
+    0.5 *
     (-p1[1] * p2[0] +
       p0[1] * (-p1[0] + p2[0]) +
       p0[0] * (p1[1] - p2[1]) +
       p1[0] * p2[1]);
-  const sign = A < 0 ? -1 : 1;
+
   const s =
+    (1 / (2 * area)) *
     (p0[1] * p2[0] -
       p0[0] * p2[1] +
       (p2[1] - p0[1]) * p[0] +
-      (p0[0] - p2[0]) * p[1]) *
-    sign;
+      (p0[0] - p2[0]) * p[1]);
   const t =
+    (1 / (2 * area)) *
     (p0[0] * p1[1] -
       p0[1] * p1[0] +
       (p0[1] - p1[1]) * p[0] +
-      (p1[0] - p0[0]) * p[1]) *
-    sign;
+      (p1[0] - p0[0]) * p[1]);
 
-  // >= instead of > so that boundary is true
-  return s >= 0 && t >= 0 && s + t < 2 * A * sign;
+  return [1 - s - t, s, t];
 }
