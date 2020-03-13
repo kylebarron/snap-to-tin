@@ -8,7 +8,9 @@ import {
   lineTriangleIntersect,
   triangleToEdges,
   triangleVertex,
-  splitLine
+  splitLine,
+  triangleToBounds,
+  pointInTriangle
 } from "../src/geom";
 
 describe("interpolateTriangle", () => {
@@ -483,5 +485,66 @@ describe("splitLine", () => {
       [2 / 3, 2 / 3],
       [1, 1]
     ]);
+  });
+});
+
+describe("triangleToBounds", () => {
+  test("find bounds of triangle", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const result = triangleToBounds(triangle);
+    const expected = [0, 0, 1, 1];
+    expect(result).toStrictEqual(expected);
+  });
+});
+
+describe("pointInTriangle", () => {
+  test("point on boundary", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [0, 0.5];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(true);
+  });
+  test("point at vertex", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [0, 0];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(true);
+  });
+  test("point inside triangle", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [0.25, 0.25];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(true);
+  });
+  test("point outside triangle", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [1, 1];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(false);
   });
 });

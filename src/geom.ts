@@ -210,11 +210,13 @@ export function triangleToBounds(triangle: Float32Array): number[] {
 // From https://stackoverflow.com/a/2049712
 // And this linked jsfiddle: http://jsfiddle.net/PerroAZUL/zdaY8/1/
 export function pointInTriangle(
-  p: number[],
-  p0: number[],
-  p1: number[],
-  p2: number[]
+  p: Point | PointZ,
+  triangle: TriangleZ
 ): boolean {
+  const p0 = triangle.subarray(0, 3);
+  const p1 = triangle.subarray(3, 6);
+  const p2 = triangle.subarray(6, 9);
+
   const A =
     (1 / 2) *
     (-p1[1] * p2[0] +
@@ -235,5 +237,6 @@ export function pointInTriangle(
       (p1[0] - p0[0]) * p[1]) *
     sign;
 
-  return s > 0 && t > 0 && s + t < 2 * A * sign;
+  // >= instead of > so that boundary is true
+  return s >= 0 && t >= 0 && s + t < 2 * A * sign;
 }
