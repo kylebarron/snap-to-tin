@@ -1,13 +1,13 @@
 import { getType } from "@turf/invariant";
 import bboxClip from "@turf/bbox-clip";
-import isPointInPolygon from "@turf/boolean-point-in-polygon";
 import uniqBy from "lodash.uniqby";
 import orderBy from "lodash.orderby";
 import equals from "fast-deep-equal";
 import {
   interpolateTriangle,
   interpolateEdge,
-  lineTriangleIntersect
+  lineTriangleIntersect,
+  pointInTriangle
 } from "./geom";
 import { constructRTree, searchLineInIndex } from "./rtree";
 
@@ -35,7 +35,9 @@ export function snapFeatures(options = {}) {
         }
       }
 
-      feature.geometry.coordinates = handlePoint(coord, index, triangles);
+      const newPoint = handlePoint(coord, index, triangles)
+      if (!newPoint) continue;
+      feature.geometry.coordinates = newPoint;
       newFeatures.push(feature);
     } else if (geometryType === "LineString") {
       // Instantiate clippedFeature in case bounds is null
@@ -77,28 +79,28 @@ export function snapFeatures(options = {}) {
 function handlePoint(point, index, triangles) {
   // Search index for point
   const [x, y] = point.slice(0, 2);
-  const results = index.search(x, y, x, y).map(i => triangles[i]);
+  // array of TypedArrays of length 9
+  const results = index
+    .search(x, y, x, y)
+    .map(i => triangles.subarray(i * 9, (i + 1) * 9));
 
-  // Check each result
+  // Find true positives from rtree results
   // Since I'm working with triangles and not square boxes, it's possible that a point could be
   // inside the triangle's bounding box but outside the triangle itself.
+  // array of TypedArrays of length 9
   const filteredResults = results.filter(result => {
-    if (isPointInPolygon(point, result)) return result;
+    if (pointInTriangle(point, result)) return result;
   });
 
-  // if (filteredResults.length > 1) {
-  //   console.log(`${filteredResults.length} results from point in polygon search`)
-  // }
-  //
-  // if (filteredResults.length === 0) {
-  //   console.log('no results')
-  //   console.log(point)
-  // }
+  // Not sure why this is sometimes empty after filtering??
+  if (filteredResults.length === 0) {
+    return null;
+  }
 
   // Now linearly interpolate elevation within this triangle
-  const triangle = filteredResults[0].geometry.coordinates[0];
-  const interpolatedPoint = interpolateTriangle(triangle, point);
-  return interpolatedPoint;
+  // TypedArray of length 9
+  const triangle = filteredResults[0];
+  return interpolateTriangle(triangle, point);
 }
 
 // Add coordinates for LineString
@@ -118,17 +120,16 @@ function handleLineString(line, index, triangles) {
 
     // Find edges that this line segment crosses
     // First search in rtree. This is fast but has false-positives
-    const results = searchLineInIndex({ line: lineSegment, index }).map(
-      i => triangles[i]
+    // array of TypedArrays of length 9
+    const results = searchLineInIndex({ line: lineSegment, index }).map(i =>
+      triangles.subarray(i * 9, (i + 1) * 9)
     );
 
     // Find points where line crosses edges
     // intersectionPoints is Array([x, y, z])
     // Note that intersectionPoints has 2x duplicates!
     // This is because every edge crossed is part of two triangles!
-    const intersectionPoints = results.flatMap(result => {
-      const triangle = result.geometry.coordinates[0];
-
+    const intersectionPoints = results.flatMap(triangle => {
       // Rename:
       const intersectionPoints = lineTriangleIntersect(lineSegment, triangle);
       if (!intersectionPoints || intersectionPoints.length === 0) return [];
@@ -165,11 +166,12 @@ function handleLineString(line, index, triangles) {
     }
 
     const newStart = handlePoint(start, index, triangles);
-    coordsWithZ.push(newStart);
+    if (newStart) coordsWithZ.push(newStart);
     coordsWithZ = coordsWithZ.concat(sorted);
   }
 
   const endPoint = line.slice(-1)[0];
-  coordsWithZ.push(handlePoint(endPoint, index, triangles));
+  const newEnd = handlePoint(endPoint, index, triangles);
+  if (newEnd) coordsWithZ.push(newEnd);
   return coordsWithZ;
 }

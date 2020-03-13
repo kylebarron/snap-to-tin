@@ -1,7 +1,5 @@
-import { polygon as Polygon } from "@turf/helpers";
-import bbox from "@turf/bbox";
 import Flatbush from "flatbush";
-import { splitLine } from "./geom";
+import { splitLine, triangleToBounds } from "./geom";
 import { LineSegment } from "./types";
 
 // Get triangles from terrain
@@ -10,12 +8,15 @@ export function constructRTree(indices: Int32Array, positions: Float32Array) {
   const triangles = createTriangles(indices, positions);
 
   // initialize Flatbush for # of items
-  const index = new Flatbush(triangles.length);
+  // each triangle has 3 vertices of 3 coordinates each
+  // 16 is default for nodeSize
+  // store coordinates in flatbush internally as Float32Array
+  const index = new Flatbush(triangles.length / 9, 16, Float32Array);
 
   // fill it with bounding boxes of triangles
-  for (const triangle of triangles) {
-    // Get bounding box of triangle for insertion into rtree
-    const [minX, minY, maxX, maxY] = bbox(triangle);
+  for (let i = 0; i < triangles.length / 9; i++) {
+    const triangle = triangles.subarray(i * 9, (i + 1) * 9);
+    const [minX, minY, maxX, maxY] = triangleToBounds(triangle);
     index.add(minX, minY, maxX, maxY);
   }
 
@@ -24,8 +25,11 @@ export function constructRTree(indices: Int32Array, positions: Float32Array) {
   return [index, triangles];
 }
 
-function createTriangles(indices: Int32Array, positions: Float32Array) {
-  const triangles = [];
+export function createTriangles(
+  indices: Int32Array,
+  positions: Float32Array
+): Float32Array {
+  const triangles = new Float32Array(indices.length * 3);
   for (let i = 0; i < indices.length; i += 3) {
     // The indices within `positions` of the three vertices of the triangle
     const aIndex = indices[i];
@@ -33,13 +37,13 @@ function createTriangles(indices: Int32Array, positions: Float32Array) {
     const cIndex = indices[i + 2];
 
     // The three vertices of the triangle, where each vertex is an array of [x, y, z]
-    const a = Array.from(positions.subarray(aIndex * 3, (aIndex + 1) * 3));
-    const b = Array.from(positions.subarray(bIndex * 3, (bIndex + 1) * 3));
-    const c = Array.from(positions.subarray(cIndex * 3, (cIndex + 1) * 3));
+    const a = positions.subarray(aIndex * 3, (aIndex + 1) * 3);
+    const b = positions.subarray(bIndex * 3, (bIndex + 1) * 3);
+    const c = positions.subarray(cIndex * 3, (cIndex + 1) * 3);
 
-    // Create polygon from these coords
-    const geom = Polygon([[a, b, c, a]]);
-    triangles.push(geom);
+    triangles.set(a, i * 3);
+    triangles.set(b, (i + 1) * 3);
+    triangles.set(c, (i + 2) * 3);
   }
   return triangles;
 }

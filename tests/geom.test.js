@@ -6,29 +6,33 @@ import {
   floatIsClose,
   lineLineIntersection,
   lineTriangleIntersect,
-  splitLine
+  triangleToEdges,
+  triangleVertex,
+  splitLine,
+  triangleToBounds,
+  pointInTriangle
 } from "../src/geom";
 
-describe('interpolateTriangle', () => {
-  test('interpolates correctly on edge', () => {
-    const triangle = [
-      [0, 0, 10],
-      [0, 1, 20],
-      [1, 0, 30],
-      [0, 0, 10]
-    ];
+describe("interpolateTriangle", () => {
+  test("interpolates correctly on edge", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
     const point = [0, 0.5];
     const result = interpolateTriangle(triangle, point);
     expect(result).toStrictEqual([0, 0.5, 15]);
-  })
+  });
 
   test("interpolates correctly at vertex", () => {
-    const triangle = [
-      [0, 0, 10],
-      [0, 1, 20],
-      [1, 0, 30],
-      [0, 0, 10]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
     const point = [0, 0];
     const result = interpolateTriangle(triangle, point);
     expect(result).toStrictEqual([0, 0, 10]);
@@ -36,76 +40,75 @@ describe('interpolateTriangle', () => {
 
   test("interpolates correctly inside triangle", () => {
     // equilateral triangle with length 2 on each side
-    const triangle = [
-      [0, 0, 10],
-      [1, Math.sqrt(3), 20],
-      [2, 0, 30],
-      [0, 0, 10]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      1, Math.sqrt(3), 20,
+      2, 0, 30,
+    ]);
     // Middle of triangle
     const point = [1, Math.sqrt(3) / 2];
     const result = interpolateTriangle(triangle, point);
     expect(result).toStrictEqual([1, Math.sqrt(3) / 2, 20]);
   });
 
-
   test("returns null for point not on edge, outside triangle", () => {
-    const triangle = [
-      [0, 0, 10],
-      [0, 1, 20],
-      [1, 0, 30],
-      [0, 0, 10]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
     const point = [10, 10];
     const result = interpolateTriangle(triangle, point);
     expect(result).toBeNull();
   });
-})
+});
 
 describe("interpolateEdge", () => {
   test("interpolates correctly on edge", () => {
-    const triangle = [
-      [0, 0, 10],
-      [0, 1, 20],
-      [1, 0, 30],
-      [0, 0, 10]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
     const point = [0, 0.5];
     const result = interpolateEdge(triangle, point);
     expect(result).toStrictEqual([0, 0.5, 15]);
   });
 
   test("interpolates correctly at vertex", () => {
-    const triangle = [
-      [0, 0, 10],
-      [0, 1, 20],
-      [1, 0, 30],
-      [0, 0, 10]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
     const point = [0, 0];
     const result = interpolateEdge(triangle, point);
     expect(result).toStrictEqual([0, 0, 10]);
   });
 
   test("returns null for point not on edge, outside triangle", () => {
-    const triangle = [
-      [0, 0, 10],
-      [0, 1, 20],
-      [1, 0, 30],
-      [0, 0, 10]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
     const point = [10, 10];
     const result = interpolateEdge(triangle, point);
     expect(result).toBeNull();
   });
 
   test("returns null for point not on edge, inside triangle", () => {
-    const triangle = [
-      [0, 0, 10],
-      [0, 1, 20],
-      [1, 0, 30],
-      [0, 0, 10]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
     const point = [0.25, 0.25];
     const result = interpolateEdge(triangle, point);
     expect(result).toBeNull();
@@ -240,12 +243,12 @@ describe("lineTriangleIntersect", () => {
       [0.25, 0.25],
       [1, 1]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     expect(result).toStrictEqual([[0.5, 0.5]]);
   });
@@ -255,12 +258,12 @@ describe("lineTriangleIntersect", () => {
       [-1, 0.5],
       [2, 0.5]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     expect(result).toStrictEqual([
       [0, 0.5],
@@ -273,12 +276,12 @@ describe("lineTriangleIntersect", () => {
       [0, 0.5],
       [2, 0.5]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     expect(result).toStrictEqual([
       [0, 0.5],
@@ -291,12 +294,12 @@ describe("lineTriangleIntersect", () => {
       [0, 0.5],
       [0.5, 0.5]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     expect(result).toStrictEqual([
       [0, 0.5],
@@ -309,12 +312,12 @@ describe("lineTriangleIntersect", () => {
       [-1, 1],
       [1, 1]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     // Note, currently returns duplicates
     expect(result).toStrictEqual([
@@ -328,12 +331,12 @@ describe("lineTriangleIntersect", () => {
       [0, 1],
       [1, 1]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     // Note, currently returns duplicates
     expect(result).toStrictEqual([
@@ -347,12 +350,12 @@ describe("lineTriangleIntersect", () => {
       [0, 0],
       [0, 1]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     // Counterintuitive at first, but this is desired behavior. See #23
     expect(result).toContainEqual([0, 0]);
@@ -364,14 +367,71 @@ describe("lineTriangleIntersect", () => {
       [0, 0],
       [0, 0.5]
     ];
-    const triangle = [
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [0, 0]
-    ];
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
     const result = lineTriangleIntersect(line, triangle);
     expect(result).toStrictEqual([[0, 0]]);
+  });
+});
+
+describe("triangleToEdges", () => {
+  test("returns edges", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0
+    ]);
+    const generator = triangleToEdges(triangle);
+    const firstEdge = generator.next().value;
+    const secondEdge = generator.next().value;
+    const thirdEdge = generator.next().value;
+    const expectedFirst = [
+      Float32Array.from([0, 0, 0]),
+      Float32Array.from([0, 1, 0])
+    ];
+    const expectedSecond = [
+      Float32Array.from([0, 1, 0]),
+      Float32Array.from([1, 0, 0])
+    ];
+    const expectedThird = [
+      Float32Array.from([1, 0, 0]),
+      Float32Array.from([0, 0, 0])
+    ];
+    expect(firstEdge).toEqual(expectedFirst);
+    expect(secondEdge).toEqual(expectedSecond);
+    expect(thirdEdge).toEqual(expectedThird);
+  });
+});
+
+describe("triangleVertex", () => {
+  // prettier-ignore
+  const triangle = Float32Array.from([
+    0, 0, 0,
+    0, 1, 0,
+    1, 0, 0
+  ]);
+  test("returns vertex 0", () => {
+    const i = 0;
+    const result = triangleVertex(i, triangle);
+    const expected = Float32Array.from([0, 0, 0]);
+    expect(result).toEqual(expected);
+  });
+  test("returns vertex 1", () => {
+    const i = 1;
+    const result = triangleVertex(i, triangle);
+    const expected = Float32Array.from([0, 1, 0]);
+    expect(result).toEqual(expected);
+  });
+  test("returns vertex 2", () => {
+    const i = 2;
+    const result = triangleVertex(i, triangle);
+    const expected = Float32Array.from([1, 0, 0]);
+    expect(result).toEqual(expected);
   });
 });
 
@@ -425,5 +485,66 @@ describe("splitLine", () => {
       [2 / 3, 2 / 3],
       [1, 1]
     ]);
+  });
+});
+
+describe("triangleToBounds", () => {
+  test("find bounds of triangle", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const result = triangleToBounds(triangle);
+    const expected = [0, 0, 1, 1];
+    expect(result).toStrictEqual(expected);
+  });
+});
+
+describe("pointInTriangle", () => {
+  test("point on boundary", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [0, 0.5];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(true);
+  });
+  test("point at vertex", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [0, 0];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(true);
+  });
+  test("point inside triangle", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [0.25, 0.25];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(true);
+  });
+  test("point outside triangle", () => {
+    // prettier-ignore
+    const triangle = Float32Array.from([
+      0, 0, 10,
+      0, 1, 20,
+      1, 0, 30
+    ]);
+    const point = [1, 1];
+    const result = pointInTriangle(point, triangle);
+    expect(result).toBe(false);
   });
 });

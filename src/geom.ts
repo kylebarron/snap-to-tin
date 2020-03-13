@@ -1,18 +1,13 @@
 import barycentric from "barycentric";
-import { PointZ, Point, Triangle, TriangleZ, LineSegment } from "./types";
+import { PointZ, Point, TriangleZ, LineSegment } from "./types";
 
-// a, b, c must be arrays of three elements
-// point must be an array of two elements
 // TODO: add tests where you assert that the interpolated z is above the min vertex height and below
 // the max vertex height
 export function interpolateTriangle(
   triangle: TriangleZ,
   point: Point
 ): PointZ | null {
-  const [a, b, c] = triangle.slice(0, 3);
-  const [ax, ay, az] = a;
-  const [bx, by, bz] = b;
-  const [cx, cy, cz] = c;
+  const [ax, ay, az, bx, by, bz, cx, cy, cz] = triangle;
 
   // Find the mix of a, b, and c to use
   const mix: number[] = barycentric(
@@ -44,16 +39,14 @@ export function interpolateTriangle(
 
 // Interpolate when point is known to be on triangle edge
 // Can be much faster than working with barycentric coordinates
-// triangle is [a, b, c, d], where each vertex is (x, y, z)
-// point is (x, y)
 export function interpolateEdge(
   triangle: TriangleZ,
   point: Point
 ): PointZ | null {
   // loop over each edge until you find one where the point is on the line
-  for (let i = 0; i < triangle.length - 1; i++) {
-    const start = triangle[i];
-    const end = triangle[i + 1];
+  for (const edge of triangleToEdges(triangle)) {
+    const start = edge[0];
+    const end = edge[1];
 
     const onLine = pointOnLine(start, end, point);
     if (!onLine) continue;
@@ -130,30 +123,46 @@ export function lineLineIntersection(
   return [x, y];
 }
 
-// line is [a, b]
-// triangle is [x, y, z, x]
-// where all of the above are 2-tuples
 // Test line-line intersection among line and each edge of the triangle
 export function lineTriangleIntersect(
   line: LineSegment,
-  triangle: Triangle
+  triangle: TriangleZ
 ): Point[] {
   // loop over each edge
   const intersectionPoints = [];
-  for (let i = 0; i < triangle.length - 1; i++) {
-    const edge = [triangle[i], triangle[i + 1]];
+  for (const edge of triangleToEdges(triangle)) {
     const intersectionPoint = lineLineIntersection(
       line[0],
       line[1],
       edge[0],
       edge[1]
     );
-
     if (intersectionPoint) {
       intersectionPoints.push(intersectionPoint);
     }
   }
   return intersectionPoints;
+}
+
+export function* triangleToEdges(triangle: TriangleZ) {
+  for (let i = 0; i < 3; i++) {
+    let edge = [];
+    if (i === 0) {
+      edge.push(triangleVertex(0, triangle));
+      edge.push(triangleVertex(1, triangle));
+    } else if (i === 1) {
+      edge.push(triangleVertex(1, triangle));
+      edge.push(triangleVertex(2, triangle));
+    } else if (i === 2) {
+      edge.push(triangleVertex(2, triangle));
+      edge.push(triangleVertex(0, triangle));
+    }
+    yield edge;
+  }
+}
+
+export function triangleVertex(i, triangle) {
+  return triangle.subarray(i * 3, (i + 1) * 3);
 }
 
 // Split line into desired number of segments
@@ -180,4 +189,50 @@ export function splitLine({
   }
 
   return lineSegments;
+}
+
+export function triangleToBounds(triangle: Float32Array): number[] {
+  if (triangle.length !== 9) {
+    throw new Error(`Incorrect length of triangle: ${triangle.length}`);
+  }
+
+  const minX = Math.min(triangle[0], triangle[3], triangle[6]);
+  const maxX = Math.max(triangle[0], triangle[3], triangle[6]);
+  const minY = Math.min(triangle[1], triangle[4], triangle[7]);
+  const maxY = Math.max(triangle[1], triangle[4], triangle[7]);
+  return [minX, minY, maxX, maxY];
+}
+
+// From https://stackoverflow.com/a/2049712
+// And this linked jsfiddle: http://jsfiddle.net/PerroAZUL/zdaY8/1/
+export function pointInTriangle(
+  p: Point | PointZ,
+  triangle: TriangleZ
+): boolean {
+  const p0 = triangle.subarray(0, 3);
+  const p1 = triangle.subarray(3, 6);
+  const p2 = triangle.subarray(6, 9);
+
+  const A =
+    (1 / 2) *
+    (-p1[1] * p2[0] +
+      p0[1] * (-p1[0] + p2[0]) +
+      p0[0] * (p1[1] - p2[1]) +
+      p1[0] * p2[1]);
+  const sign = A < 0 ? -1 : 1;
+  const s =
+    (p0[1] * p2[0] -
+      p0[0] * p2[1] +
+      (p2[1] - p0[1]) * p[0] +
+      (p0[0] - p2[0]) * p[1]) *
+    sign;
+  const t =
+    (p0[0] * p1[1] -
+      p0[1] * p1[0] +
+      (p0[1] - p1[1]) * p[0] +
+      (p1[0] - p0[0]) * p[1]) *
+    sign;
+
+  // >= instead of > so that boundary is true
+  return s >= 0 && t >= 0 && s + t < 2 * A * sign;
 }
