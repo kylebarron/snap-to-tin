@@ -1,5 +1,4 @@
-import { getType } from "@turf/invariant";
-import bboxClip from "@turf/bbox-clip";
+// import { Feature } from "@types/geojson"
 import Flatbush from "flatbush";
 import uniqBy from "lodash.uniqby";
 import orderBy from "lodash.orderby";
@@ -9,80 +8,8 @@ import {
   lineTriangleIntersect2d,
   pointInTriangle2d
 } from "./geom";
-import { constructRTree, searchLineInIndex } from "./rtree";
+import { searchLineInIndex } from "./rtree";
 import { Point, PointZ } from "./types";
-
-export function snapFeatures(options) {
-  const {
-    indices,
-    positions,
-    features,
-    bounds = null
-  }: {
-    indices: Int32Array;
-    positions: Float32Array;
-    features: any[];
-    bounds: [number, number, number, number] | null;
-  } = options;
-
-  const { index, triangles } = constructRTree(indices, positions);
-  const newFeatures = [];
-
-  for (const feature of features) {
-    const geometryType = getType(feature);
-
-    if (geometryType === "Point") {
-      const coord = feature.geometry.coordinates;
-
-      if (bounds && bounds.length === 4) {
-        // Make sure coordinate is within bounds
-        if (
-          coord[0] < bounds[0] ||
-          coord[0] > bounds[2] ||
-          coord[1] < bounds[1] ||
-          coord[1] > bounds[3]
-        ) {
-          continue;
-        }
-      }
-
-      const newPoint = handlePoint(coord, index, triangles);
-      if (!newPoint) continue;
-      feature.geometry.coordinates = newPoint;
-      newFeatures.push(feature);
-    } else if (geometryType === "LineString") {
-      // Instantiate clippedFeature in case bounds is null
-      let clippedFeature = feature;
-
-      // Clip to box
-      if (bounds && bounds.length === 4) {
-        clippedFeature = bboxClip(feature, bounds);
-      }
-
-      const coords = clippedFeature.geometry.coordinates;
-
-      // If empty, continue
-      if (coords.length === 0) {
-        continue;
-      }
-
-      // TODO: support multilinestrings
-      // Note that the clipped Feature can now be a MultiLineString
-      if (getType(clippedFeature) === "MultiLineString") {
-        continue;
-      }
-
-      clippedFeature.geometry.coordinates = handleLineString(
-        coords,
-        index,
-        triangles
-      );
-      newFeatures.push(clippedFeature);
-    }
-  }
-
-  return newFeatures;
-}
 
 // Find elevation of point
 export function handlePoint(
