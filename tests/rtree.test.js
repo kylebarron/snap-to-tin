@@ -18,7 +18,7 @@ describe("constructRTree", () => {
       0, 4, 30,
       4, 0, 40,
     ])
-    const index = constructRTree(indices, positions)[0];
+    const { index } = constructRTree(indices, positions);
     expect(index.minX).toEqual(0);
     expect(index.minY).toEqual(0);
     expect(index.maxX).toEqual(4);
