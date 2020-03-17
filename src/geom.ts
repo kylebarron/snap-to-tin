@@ -64,7 +64,7 @@ export function pointOnLine2d(
   );
 }
 
-export function distanceLine2d(a: number[], b: number[]): number {
+export function distanceLine2d(a: Point, b: Point): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
   return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));

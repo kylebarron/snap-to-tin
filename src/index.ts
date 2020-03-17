@@ -87,7 +87,37 @@ export class snapFeatures {
   };
 
   // Snap typedArray of points
-  snapPoints = () => {};
+  snapPoints = options => {
+    const {
+      positions,
+      coordLength = 2
+    }: { positions: Float32Array; coordLength: number } = options;
+    const newPoints = new Float32Array((positions.length / coordLength) * 3);
+
+    for (let i = 0; i < positions.length; i += coordLength) {
+      const coord = positions.subarray(i * coordLength, (i + 1) * coordLength);
+
+      if (this.bounds && this.bounds.length === 4) {
+        // Make sure coordinate is within bounds
+        if (
+          coord[0] < this.bounds[0] ||
+          coord[0] > this.bounds[2] ||
+          coord[1] < this.bounds[1] ||
+          coord[1] > this.bounds[3]
+        ) {
+          continue;
+        }
+      }
+
+      const newPoint = handlePoint(coord, this.index, this.triangles);
+      if (!newPoint) {
+        console.log("point not found");
+        continue;
+      }
+
+      newPoints.set(newPoint, i * coordLength);
+    }
+  };
 
   // Snap typedArray of lines
   snapLines = () => {};
