@@ -4,7 +4,7 @@ import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
 
-export class snapFeatures {
+export class SnapFeatures {
   index: Flatbush;
   triangles: Float32Array;
   bounds: [number, number, number, number] | null;
