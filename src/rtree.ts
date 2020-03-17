@@ -22,7 +22,7 @@ export function constructRTree(indices: Int32Array, positions: Float32Array) {
 
   // perform the indexing
   index.finish();
-  return [index, triangles];
+  return {index, triangles};
 }
 
 export function createTriangles(
