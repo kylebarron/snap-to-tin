@@ -3,7 +3,10 @@
     "moduleResolution": "node",
     "outDir": "./lib",
     "allowJs": true,
-    "target": "es2015"
+    "target": "es2015",
+    "lib": [
+      "es2019.array", "es6"
+    ]
   },
   "include": ["./src/**/*"]
 }
