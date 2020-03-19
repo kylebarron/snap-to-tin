@@ -19,6 +19,7 @@ export function handlePoint(
 ): PointZ | null {
   // Search index for point
   const [x, y] = point.slice(0, 2);
+
   // array of TypedArrays of length 9
   const results = index
     .search(x, y, x, y)
