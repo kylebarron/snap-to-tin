@@ -91,8 +91,13 @@ export class SnapFeatures {
   snapPoints = options => {
     const {
       positions,
-      coordLength = 2
-    }: { positions: Float32Array; coordLength: number } = options;
+      coordLength = 2,
+      objectIds = null
+    }: {
+      positions: Float32Array;
+      coordLength: number;
+      objectIds?: Uint16Array;
+    } = options;
     const newPoints = new Float32Array((positions.length / coordLength) * 3);
     const skipIndices = [];
 
@@ -125,7 +130,14 @@ export class SnapFeatures {
     }
 
     // Remove points that were allocated but not filled
-    return filterArray(newPoints, skipIndices, 3);
+    const results = {
+      positions: filterArray(newPoints, skipIndices, 3),
+      objectIds: null
+    };
+    if (objectIds && objectIds.length > 0) {
+      results.objectIds = filterArray(objectIds, skipIndices, 1);
+    }
+    return results;
   };
 
   // Snap typedArray of lines
