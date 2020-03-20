@@ -3,6 +3,7 @@ import bboxClip from "@turf/bbox-clip";
 import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
+import { filterArray } from "./util";
 
 export class SnapFeatures {
   index: Flatbush;
@@ -93,18 +94,21 @@ export class SnapFeatures {
       coordLength = 2
     }: { positions: Float32Array; coordLength: number } = options;
     const newPoints = new Float32Array((positions.length / coordLength) * 3);
+    const skipIndices = [];
 
-    for (let i = 0; i < positions.length; i += coordLength) {
+    // Iterate over vertex index
+    for (let i = 0; i < positions.length / coordLength; i++) {
       const coord = positions.subarray(i * coordLength, (i + 1) * coordLength);
 
       if (this.bounds && this.bounds.length === 4) {
-        // Make sure coordinate is within bounds
+        // If outside bounds, skip
         if (
           coord[0] < this.bounds[0] ||
           coord[0] > this.bounds[2] ||
           coord[1] < this.bounds[1] ||
           coord[1] > this.bounds[3]
         ) {
+          skipIndices.push(i);
           continue;
         }
       }
@@ -112,11 +116,16 @@ export class SnapFeatures {
       const newPoint = handlePoint(coord, this.index, this.triangles);
       if (!newPoint) {
         console.log("point not found");
+        skipIndices.push(i);
         continue;
       }
 
+      // Fill point into array
       newPoints.set(newPoint, i * coordLength);
     }
+
+    // Remove points that were allocated but not filled
+    return filterArray(newPoints, skipIndices, 3);
   };
 
   // Snap typedArray of lines
