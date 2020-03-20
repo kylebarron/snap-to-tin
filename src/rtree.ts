@@ -1,9 +1,9 @@
 import Flatbush from "flatbush";
 import { splitLine2d, triangleToBounds } from "./geom";
-import { LineSegment } from "./types";
+import { LineSegment, FloatArray } from "./types";
 
 // Get triangles from terrain
-export function constructRTree(indices: Int32Array, positions: Float32Array) {
+export function constructRTree(indices: Int32Array, positions: FloatArray) {
   // Create list of objects for insertion into RTree
   const triangles = createTriangles(indices, positions);
 
@@ -22,13 +22,13 @@ export function constructRTree(indices: Int32Array, positions: Float32Array) {
 
   // perform the indexing
   index.finish();
-  return {index, triangles};
+  return { index, triangles };
 }
 
 export function createTriangles(
   indices: Int32Array,
-  positions: Float32Array
-): Float32Array {
+  positions: FloatArray
+): FloatArray {
   const triangles = new Float32Array(indices.length * 3);
   for (let i = 0; i < indices.length; i += 3) {
     // The indices within `positions` of the three vertices of the triangle

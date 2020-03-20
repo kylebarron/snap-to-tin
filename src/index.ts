@@ -4,10 +4,11 @@ import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
 import { filterArray } from "./util";
+import { FloatArray } from "./types";
 
 export class SnapFeatures {
   index: Flatbush;
-  triangles: Float32Array;
+  triangles: FloatArray;
   bounds: [number, number, number, number] | null;
 
   constructor(options) {
@@ -17,7 +18,7 @@ export class SnapFeatures {
       bounds = null
     }: {
       indices: Int32Array;
-      positions: Float32Array;
+      positions: FloatArray;
       bounds: [number, number, number, number] | null;
     } = options;
 
@@ -94,7 +95,7 @@ export class SnapFeatures {
       coordLength = 2,
       objectIds = null
     }: {
-      positions: Float32Array;
+      positions: FloatArray;
       coordLength: number;
       objectIds?: Uint16Array;
     } = options;

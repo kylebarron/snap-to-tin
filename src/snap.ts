@@ -9,19 +9,19 @@ import {
   pointInTriangle2d
 } from "./geom";
 import { searchLineInIndex } from "./rtree";
-import { Point, PointZ } from "./types";
+import { Point, PointZ, FloatArray } from "./types";
 
 // Find elevation of point
 export function handlePoint(
   point: Point,
   index: Flatbush,
-  triangles: Float32Array
+  triangles: FloatArray
 ): PointZ | null {
   // Search index for point
   const [x, y] = point.slice(0, 2);
 
   // array of TypedArrays of length 9
-  const results = index
+  const candidateTriangles = index
     .search(x, y, x, y)
     .map(i => triangles.subarray(i * 9, (i + 1) * 9));
 
@@ -29,7 +29,7 @@ export function handlePoint(
   // Since I'm working with triangles and not square boxes, it's possible that a point could be
   // inside the triangle's bounding box but outside the triangle itself.
   // array of TypedArrays of length 9
-  const filteredResults = results.filter(result => {
+  const filteredResults = candidateTriangles.filter(result => {
     if (pointInTriangle2d(point, result)) return result;
   });
 
@@ -48,7 +48,7 @@ export function handlePoint(
 export function handleLineString(
   line: Point[],
   index: Flatbush,
-  triangles: Float32Array
+  triangles: FloatArray
 ) {
   let coordsWithZ = [];
 

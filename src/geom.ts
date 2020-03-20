@@ -183,7 +183,7 @@ export function splitLine2d({
   return lineSegments;
 }
 
-export function triangleToBounds(triangle: Float32Array): number[] {
+export function triangleToBounds(triangle: TriangleZ): number[] {
   if (triangle.length !== 9) {
     throw new Error(`Incorrect length of triangle: ${triangle.length}`);
   }
