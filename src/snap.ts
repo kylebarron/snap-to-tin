@@ -1,6 +1,5 @@
 // import { Feature } from "@types/geojson"
 import Flatbush from "flatbush";
-import uniqBy from "lodash.uniqby";
 import orderBy from "lodash.orderby";
 import {
   interpolateTriangle,
@@ -26,8 +25,9 @@ export function handlePoint(
     .map(i => triangles.subarray(i * 9, (i + 1) * 9));
 
   // Find true positives from rtree results
-  // Since I'm working with triangles and not square boxes, it's possible that a point could be
-  // inside the triangle's bounding box but outside the triangle itself.
+  // Since I'm working with triangles and not square boxes, it's possible that a
+  // point could be inside the triangle's bounding box but outside the triangle
+  // itself.
   // array of TypedArrays of length 9
   const filteredResults = candidateTriangles.filter(result => {
     if (pointInTriangle2d(point, result)) return result;
@@ -68,10 +68,12 @@ export function handleLineString(
     }
 
     // Find intermediate points of line segment
-    const sorted = handleLineSegment([start, end], index, triangles);
-    if (sorted) {
-      newPositions.set(sorted.flat(), positionIndex * coordLength);
-      positionIndex += sorted.length;
+    const lineZ = handleLineSegment([start, end], index, triangles);
+    if (lineZ) {
+      for (const coord of lineZ) {
+        newPositions.set(coord, positionIndex * coordLength);
+        positionIndex++;
+      }
     }
   }
 
@@ -87,7 +89,13 @@ export function handleLineString(
   return newPositions.subarray(0, positionIndex * coordLength);
 }
 
-export function handleLineSegment(lineSegment, index, triangles) {
+// Find intersections between line segment and triangle edges
+// This does not handle line segment endpoints
+export function handleLineSegment(
+  lineSegment: Point[],
+  index: Flatbush,
+  triangles: FloatArray
+): PointZ[] | null {
   const [start, end] = lineSegment;
 
   // Sometimes the start and end points can be the same, usually from clipping
@@ -95,47 +103,70 @@ export function handleLineSegment(lineSegment, index, triangles) {
 
   // Find edges that this line segment crosses
   // First search in rtree. This is fast but has false-positives
-  // array of TypedArrays of length 9
-  const results = searchLineInIndex(lineSegment, index).map(i =>
-    triangles.subarray(i * 9, (i + 1) * 9)
+  const candidateTrianglesIndices = searchLineInIndex(lineSegment, index);
+
+  // Find points where line segment intersects triangles
+  // # of possible triangles * # of possible intersections per triangle (2) *
+  // (x, y, z) coordLength
+  let intersectionPoints = new Float32Array(
+    candidateTrianglesIndices.length * 2 * 3
+  );
+  let intersectionPointsIndex = 0;
+
+  // NOTE that intersectionPoints by default has 2x duplicates!
+  // This is because every edge crossed is part of two triangles!
+  // To simplify, I'll deduplicate on x. NOTE: This could be problematic for
+  // vertical lines, but you can't put arrays in a Set, so it's good enough for
+  // now
+  const xVals = new Set();
+
+  for (const index of candidateTrianglesIndices) {
+    const triangle = triangles.subarray(index * 9, (index + 1) * 9);
+
+    // Possibly empty array of points where line segment intersects triangle
+    const intersections = lineTriangleIntersect2d(lineSegment, triangle);
+    if (!intersections || intersections.length === 0) continue;
+
+    // Otherwise, has one or more intersection point(s)
+    // Fill intersectionPoints
+    for (const intersection of intersections) {
+      // Skip if there already exists a position with this x coordinate
+      if (xVals.has(intersection[0])) continue;
+      xVals.add(intersection[0]);
+
+      // Find z coord
+      const newPoint = interpolateEdge(triangle, intersection);
+
+      // Add to array
+      intersectionPoints.set(newPoint, intersectionPointsIndex * 3);
+      intersectionPointsIndex++;
+    }
+  }
+
+  // Filter array to size of filled points
+  intersectionPoints = intersectionPoints.subarray(
+    0,
+    intersectionPointsIndex * 3
   );
 
-  // Find points where line crosses edges
-  // intersectionPoints is Array([x, y, z])
-  // Note that intersectionPoints has 2x duplicates!
-  // This is because every edge crossed is part of two triangles!
-  const intersectionPoints = results.flatMap(triangle => {
-    // Rename:
-    const intersectionPoints = lineTriangleIntersect2d(lineSegment, triangle);
-    if (!intersectionPoints || intersectionPoints.length === 0) return [];
-
-    // Otherwise, has an intersection point(s)
-    const newPoints = [];
-    for (const intersectionPoint of intersectionPoints) {
-      const newPoint = interpolateEdge(triangle, intersectionPoint);
-      newPoints.push(newPoint);
-    }
-
-    return newPoints;
-  });
-
-  // Quick and dirty deduplication
-  // Since interpolateTriangle appears to be working now, this just deduplicates on the first
-  // element.
-  const uniqCoords = uniqBy(intersectionPoints, x => x[0]);
-
   // sort points in order from start to end
+  // I'll convert intersectionPoints into an array of coords to simplify
+  const coords = [];
+  for (let i = 0; i < intersectionPoints.length / 3; i++) {
+    coords.push(intersectionPoints.subarray(i * 3, (i + 1) * 3));
+  }
+
   const deltaX = end[0] - start[0];
   const deltaY = end[1] - start[1];
   let sorted;
   if (deltaX > 0) {
-    sorted = orderBy(uniqCoords, c => c[0], "asc");
+    sorted = orderBy(coords, c => c[0], "asc");
   } else if (deltaX < 0) {
-    sorted = orderBy(uniqCoords, c => c[0], "desc");
+    sorted = orderBy(coords, c => c[0], "desc");
   } else if (deltaY > 0) {
-    sorted = orderBy(uniqCoords, c => c[1], "asc");
+    sorted = orderBy(coords, c => c[1], "asc");
   } else if (deltaY < 0) {
-    sorted = orderBy(uniqCoords, c => c[1], "desc");
+    sorted = orderBy(coords, c => c[1], "desc");
   } else {
     throw new Error("start and end point same???");
   }
