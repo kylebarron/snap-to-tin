@@ -1,4 +1,4 @@
-# snap-features-to-tin
+# snap-to-tin
 
 [![Build Status](https://travis-ci.org/kylebarron/snap-to-tin.svg?branch=master)](https://travis-ci.org/kylebarron/snap-to-tin)
 
@@ -22,9 +22,9 @@ new vertex is added to the resulting `LineString`, so that every part of the
 ## Install
 
 ```bash
-yarn add @kylebarron/snap-features-to-tin
+yarn add @kylebarron/snap-to-tin
 # or
-npm install @kylebarron/snap-features-to-tin
+npm install @kylebarron/snap-to-tin
 ```
 
 ## Usage
@@ -44,7 +44,7 @@ same coordinate system.**
 ### Example
 
 ```js
-import {snapFeatures} from '@kylebarron/snap-features-to-tin'
+import {snapFeatures} from '@kylebarron/snap-to-tin'
 import {load} from '@loaders.gl/core';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
