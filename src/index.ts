@@ -1,5 +1,6 @@
 import { getType } from "@turf/invariant";
 import bboxClip from "@turf/bbox-clip";
+import lineclip from "lineclip";
 import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
@@ -142,5 +143,53 @@ export class SnapFeatures {
   };
 
   // Snap typedArray of lines
-  snapLines = () => {};
+  snapLines = options => {
+    const {
+      positions,
+      pathIndices = null,
+      coordLength = 2,
+      objectIds = null
+    }: {
+      positions: FloatArray;
+      pathIndices?: Int32Array;
+      coordLength: number;
+      objectIds?: Uint16Array;
+    } = options;
+
+    const newPositions = new Float32Array((positions.length / coordLength) * 3);
+    const newPathIndices = new Int32Array(
+      (pathIndices && pathIndices.length) || 2
+    );
+
+    // Loop over each LineString
+    const loopIndices = pathIndices ? pathIndices : [0, positions.length];
+    for (let i = 0; i < loopIndices.length - 1; i++) {
+      const positionStartIndex = loopIndices[i];
+      const positionEndIndex = loopIndices[i + 1];
+
+      // Make array of coordinates
+      const line: FloatArray[] = [];
+      for (let j = positionStartIndex; j < positionEndIndex; j++) {
+        line.push(positions.subarray(j * coordLength, (j + 1) * coordLength));
+      }
+
+      // Clip line to box
+      const clippedLine = lineclip(line, this.bounds);
+
+      // If empty, continue
+      if (clippedLine.length === 0) {
+        continue;
+      }
+
+      const newCoords = handleLineString(
+        clippedLine,
+        this.index,
+        this.triangles
+      );
+
+      newPositions.set(newCoords, i * coordLength);
+    }
+
+    return newPositions;
+  };
 }
