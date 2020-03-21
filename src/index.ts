@@ -5,11 +5,17 @@ import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
 import { filterArray } from "./util";
-import { FloatArray, IntegerArray, TypedArray } from "./types";
+import { FloatArray, IntegerArray, TypedArray, Point } from "./types";
 
 interface snapPointsResultType {
   positions: TypedArray;
   objectIds?: TypedArray;
+}
+
+interface snapLinesResultType {
+  positions: TypedArray;
+  objectIds: TypedArray;
+  pathIndices: TypedArray;
 }
 
 export class SnapFeatures {
@@ -160,12 +166,20 @@ export class SnapFeatures {
       objectIds?: Uint16Array;
     } = options;
 
-    const newPositions = new Float32Array((positions.length / coordLength) * 3);
-    const newPathIndices = new Int32Array(
-      (pathIndices && pathIndices.length) || 2
-    );
+    let data: snapLinesResultType = {
+      positions: new Float32Array((positions.length / coordLength) * 3),
+      pathIndices: new Int32Array((pathIndices && pathIndices.length) || 2),
+      objectIds: objectIds
+        ? new Int32Array((positions.length / coordLength) * 3)
+        : new Int32Array(0)
+    };
 
-    // Loop over each LineString
+    let index = {
+      positions: 0,
+      pathIndices: 0
+    };
+
+    // Loop over each LineString, as defined by pathIndices
     const loopIndices = pathIndices ? pathIndices : [0, positions.length];
     for (let i = 0; i < loopIndices.length - 1; i++) {
       const positionStartIndex = loopIndices[i];
@@ -178,7 +192,7 @@ export class SnapFeatures {
       }
 
       // Clip line to box
-      const clippedLine = lineclip(line, this.bounds);
+      const clippedLine: Point[] = lineclip(line, this.bounds);
 
       // If empty, continue
       if (clippedLine.length === 0) {
@@ -190,10 +204,31 @@ export class SnapFeatures {
         this.index,
         this.triangles
       );
+      const nNewCoords = newCoords.length / 3;
 
-      newPositions.set(newCoords, i * coordLength);
+      // Fill positions
+      data.positions.set(newCoords, index.positions * coordLength);
+
+      // Fill objectIds
+      if (objectIds) {
+        // objectId should be the same for all vertices within a single
+        // LineString
+        const objectId = objectIds[index.positions];
+        data.objectIds.set(new Int16Array(nNewCoords).fill(objectId));
+      }
+
+      // Fill pathIndices
+      data.pathIndices[index.pathIndices] = index.positions;
+
+      // Increment
+      index.positions += nNewCoords;
+      index.pathIndices++;
     }
 
-    return newPositions;
+    // Resize arrays given total position count
+    data.positions = data.positions.subarray(0, index.positions * 3);
+    data.objectIds = data.objectIds.subarray(0, index.positions);
+    data.pathIndices = data.pathIndices.subarray(0, index.pathIndices);
+    return data;
   };
 }
