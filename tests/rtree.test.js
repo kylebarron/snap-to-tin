@@ -63,7 +63,7 @@ describe("getNumLineSegments", () => {
     ];
     const indexArea = 1;
     const maxPctArea = 0.01;
-    const result = getNumLineSegments({ line, indexArea, maxPctArea });
+    const result = getNumLineSegments(line, indexArea, maxPctArea);
     expect(result).toEqual(indexArea / maxPctArea);
   });
 
@@ -74,7 +74,7 @@ describe("getNumLineSegments", () => {
     ];
     const indexArea = 1;
     const maxPctArea = 0.01;
-    const result = getNumLineSegments({ line, indexArea, maxPctArea });
+    const result = getNumLineSegments(line, indexArea, maxPctArea);
     expect(result).toEqual(1);
   });
 
@@ -85,7 +85,7 @@ describe("getNumLineSegments", () => {
     ];
     const indexArea = 1;
     const maxPctArea = 0.01;
-    const result = getNumLineSegments({ line, indexArea, maxPctArea });
+    const result = getNumLineSegments(line, indexArea, maxPctArea);
     expect(result).toEqual(1);
   });
 });

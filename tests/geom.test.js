@@ -218,7 +218,7 @@ describe("lineLineIntersection2d", () => {
     const b = [0, 1];
     const c = [1, 0];
     const d = [1, 1];
-    expect(lineLineIntersection2d(a, b, c, d)).toBe(false);
+    expect(lineLineIntersection2d(a, b, c, d)).toBe(null);
   });
 
   test("overlapping lines", () => {
@@ -226,7 +226,7 @@ describe("lineLineIntersection2d", () => {
     const b = [0, 1];
     const c = [0, 0];
     const d = [0, 1];
-    expect(lineLineIntersection2d(a, b, c, d)).toBe(false);
+    expect(lineLineIntersection2d(a, b, c, d)).toBe(null);
   });
 
   test("intersect outside segments", () => {
@@ -234,7 +234,7 @@ describe("lineLineIntersection2d", () => {
     const b = [0, 1];
     const c = [2, -2];
     const d = [2, 2];
-    expect(lineLineIntersection2d(a, b, c, d)).toBe(false);
+    expect(lineLineIntersection2d(a, b, c, d)).toBe(null);
   });
 });
 
@@ -443,7 +443,7 @@ describe("splitLine2d", () => {
       [1, 1]
     ];
     const nSegments = 1;
-    const result = splitLine2d({ line, nSegments });
+    const result = splitLine2d(line, nSegments);
     expect(result).toContainEqual([
       [0, 0],
       [1, 1]
@@ -456,7 +456,7 @@ describe("splitLine2d", () => {
       [1, 1]
     ];
     const nSegments = 2;
-    const result = splitLine2d({ line, nSegments });
+    const result = splitLine2d(line, nSegments);
     expect(result).toContainEqual([
       [0, 0],
       [0.5, 0.5]
@@ -473,7 +473,7 @@ describe("splitLine2d", () => {
       [1, 1]
     ];
     const nSegments = 3;
-    const result = splitLine2d({ line, nSegments });
+    const result = splitLine2d(line, nSegments);
     expect(result).toContainEqual([
       [0, 0],
       [1 / 3, 1 / 3]
