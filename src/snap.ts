@@ -96,7 +96,7 @@ export function handleLineSegment(lineSegment, index, triangles) {
   // Find edges that this line segment crosses
   // First search in rtree. This is fast but has false-positives
   // array of TypedArrays of length 9
-  const results = searchLineInIndex({ line: lineSegment, index }).map(i =>
+  const results = searchLineInIndex(lineSegment, index).map(i =>
     triangles.subarray(i * 9, (i + 1) * 9)
   );
 

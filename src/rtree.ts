@@ -48,17 +48,15 @@ export function createTriangles(
   return triangles;
 }
 
-export function searchLineInIndex(options): number[] {
-  const {
-    index,
-    line,
-    maxPctArea = 0.01
-  }: { index: Flatbush; line: LineSegment; maxPctArea?: number } = options;
-
+export function searchLineInIndex(
+  line: LineSegment,
+  index: Flatbush,
+  maxPctArea: number = 0.01
+): number[] {
   // Reduce total area searched in rtree to reduce false positives
-  const indexArea = getIndexArea({ index });
-  const nSegments = getNumLineSegments({ line, indexArea, maxPctArea });
-  const lineSegments = splitLine2d({ line, nSegments });
+  const indexArea = getIndexArea(index);
+  const nSegments = getNumLineSegments(line, indexArea, maxPctArea);
+  const lineSegments = splitLine2d(line, nSegments);
 
   const resultIndices: Set<number> = new Set();
   for (const lineSegment of lineSegments) {
@@ -72,7 +70,7 @@ export function searchLineInIndex(options): number[] {
   return Array.from(resultIndices);
 }
 
-export function getIndexArea({ index }: { index: Flatbush }): number | null {
+export function getIndexArea(index: Flatbush): number | null {
   let area = null;
   if (
     index.minX !== Infinity &&
@@ -85,12 +83,11 @@ export function getIndexArea({ index }: { index: Flatbush }): number | null {
   return area;
 }
 
-export function getNumLineSegments(options): number {
-  const {
-    line,
-    indexArea,
-    maxPctArea = 0.01
-  }: { line: LineSegment; indexArea: number; maxPctArea?: number } = options;
+export function getNumLineSegments(
+  line: LineSegment,
+  indexArea: number,
+  maxPctArea: number = 0.01
+): number {
   if (!indexArea) {
     return 1;
   }

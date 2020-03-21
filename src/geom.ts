@@ -158,13 +158,10 @@ export function triangleVertex(i, triangle) {
 }
 
 // Split line into desired number of segments
-export function splitLine2d({
-  line,
-  nSegments
-}: {
-  line: LineSegment;
-  nSegments: number;
-}): LineSegment[] {
+export function splitLine2d(
+  line: LineSegment,
+  nSegments: number
+): LineSegment[] {
   const [start, end] = line;
   const lineSegments = [];
 
