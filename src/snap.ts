@@ -99,7 +99,7 @@ export function handleLineSegment(
   const [start, end] = lineSegment;
 
   // Sometimes the start and end points can be the same, usually from clipping
-  if (start[0] === end[0] && start[1] === end[1]) return;
+  if (start[0] === end[0] && start[1] === end[1]) return null;
 
   // Find edges that this line segment crosses
   // First search in rtree. This is fast but has false-positives
@@ -138,8 +138,10 @@ export function handleLineSegment(
       const newPoint = interpolateEdge(triangle, intersection);
 
       // Add to array
-      intersectionPoints.set(newPoint, intersectionPointsIndex * 3);
-      intersectionPointsIndex++;
+      if (newPoint) {
+        intersectionPoints.set(newPoint, intersectionPointsIndex * 3);
+        intersectionPointsIndex++;
+      }
     }
   }
 
@@ -151,7 +153,7 @@ export function handleLineSegment(
 
   // sort points in order from start to end
   // I'll convert intersectionPoints into an array of coords to simplify
-  const coords = [];
+  const coords: FloatArray[] = [];
   for (let i = 0; i < intersectionPoints.length / 3; i++) {
     coords.push(intersectionPoints.subarray(i * 3, (i + 1) * 3));
   }

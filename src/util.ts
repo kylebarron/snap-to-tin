@@ -5,16 +5,16 @@ import { TypedArray } from "./types";
  *
  * This mutates the array in place, and returns a view on the array
  *
- * @param  {TypedArray} array       Array to filter
- * @param  {Array[int]} skipIndices Indices to remove
- * @param  {int} coordLength Number of coordinates per vertex
- * @return {TypedArray}             [description]
+ * @param   array       Array to filter
+ * @param   skipIndices Indices to remove
+ * @param   coordLength Number of coordinates per vertex
+ * @return              [description]
  */
-export function filterArray(
-  array: TypedArray,
+export function filterArray<T extends TypedArray>(
+  array: T,
   skipIndices: number[],
   coordLength: number
-): TypedArray {
+) {
   // Copy all the data from skipIndices[i] to skipIndices[i + 1]
   for (let i = 0; i < skipIndices.length; i++) {
     // Start with next vertex after skipIndex

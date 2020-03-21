@@ -71,7 +71,7 @@ export function searchLineInIndex(
 }
 
 export function getIndexArea(index: Flatbush): number | null {
-  let area = null;
+  let area;
   if (
     index.minX !== Infinity &&
     index.minY !== Infinity &&
@@ -85,7 +85,7 @@ export function getIndexArea(index: Flatbush): number | null {
 
 export function getNumLineSegments(
   line: LineSegment,
-  indexArea: number,
+  indexArea: number | null,
   maxPctArea: number = 0.01
 ): number {
   if (!indexArea) {

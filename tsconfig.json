@@ -4,6 +4,7 @@
     "outDir": "./lib",
     "allowJs": true,
     "target": "es2015",
+    "strictNullChecks": true,
     "lib": [
       "es2019.array", "es6", "dom"
     ]

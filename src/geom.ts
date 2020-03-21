@@ -1,4 +1,4 @@
-import { PointZ, Point, TriangleZ, LineSegment } from "./types";
+import { PointZ, Point, TriangleZ, LineSegment, FloatArray } from "./types";
 
 export function interpolateTriangle(
   point: Point,
@@ -86,12 +86,12 @@ export function lineLineIntersection2d(
   b: Point,
   c: Point,
   d: Point
-): Point | boolean {
+): Point | null {
   // ∆x1 * ∆y2 - ∆x2 * ∆y1
   const det = (b[0] - a[0]) * (d[1] - c[1]) - (d[0] - c[0]) * (b[1] - a[1]);
   if (det === 0) {
     // NOTE: lines are parallel
-    return false;
+    return null;
   }
 
   // pct distance along each line
@@ -101,7 +101,7 @@ export function lineLineIntersection2d(
     ((a[1] - b[1]) * (d[0] - a[0]) + (b[0] - a[0]) * (d[1] - a[1])) / det;
   if (!(0 <= lambda && lambda <= 1 && 0 <= gamma && gamma <= 1)) {
     // intersects outside the line segments
-    return false;
+    return null;
   }
 
   // With the current implementation, lambda is correctly the percent distance along the first line
@@ -121,7 +121,7 @@ export function lineTriangleIntersect2d(
   triangle: TriangleZ
 ): Point[] {
   // loop over each edge
-  const intersectionPoints = [];
+  const intersectionPoints: Point[] = [];
   for (const edge of triangleToEdges(triangle)) {
     const intersectionPoint = lineLineIntersection2d(
       line[0],
@@ -138,7 +138,7 @@ export function lineTriangleIntersect2d(
 
 export function* triangleToEdges(triangle: TriangleZ) {
   for (let i = 0; i < 3; i++) {
-    let edge = [];
+    let edge: FloatArray[] = [];
     if (i === 0) {
       edge.push(triangleVertex(0, triangle));
       edge.push(triangleVertex(1, triangle));
@@ -153,7 +153,7 @@ export function* triangleToEdges(triangle: TriangleZ) {
   }
 }
 
-export function triangleVertex(i, triangle) {
+export function triangleVertex(i: number, triangle: TriangleZ) {
   return triangle.subarray(i * 3, (i + 1) * 3);
 }
 
@@ -163,7 +163,7 @@ export function splitLine2d(
   nSegments: number
 ): LineSegment[] {
   const [start, end] = line;
-  const lineSegments = [];
+  const lineSegments: LineSegment[] = [];
 
   for (let i = 0; i < nSegments; i++) {
     // _i_th part of the way from min to max

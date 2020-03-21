@@ -5,7 +5,7 @@ import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
 import { filterArray } from "./util";
-import { FloatArray } from "./types";
+import { FloatArray, IntegerArray, TypedArray } from "./types";
 
 export class SnapFeatures {
   index: Flatbush;
@@ -31,7 +31,7 @@ export class SnapFeatures {
 
   // Snap arbitrary GeoJSON features
   snapFeatures = (features: any[]) => {
-    const newFeatures = [];
+    const newFeatures: any[] = [];
 
     for (const feature of features) {
       const geometryType = getType(feature);
@@ -94,14 +94,14 @@ export class SnapFeatures {
     const {
       positions,
       coordLength = 2,
-      objectIds = null
+      objectIds
     }: {
       positions: FloatArray;
       coordLength: number;
-      objectIds?: Uint16Array;
+      objectIds?: IntegerArray;
     } = options;
     const newPoints = new Float32Array((positions.length / coordLength) * 3);
-    const skipIndices = [];
+    const skipIndices: number[] = [];
 
     // Iterate over vertex index
     for (let i = 0; i < positions.length / coordLength; i++) {
@@ -132,9 +132,12 @@ export class SnapFeatures {
     }
 
     // Remove points that were allocated but not filled
-    const results = {
-      positions: filterArray(newPoints, skipIndices, 3),
-      objectIds: null
+    interface resultsType {
+      positions: TypedArray;
+      objectIds?: TypedArray;
+    }
+    const results: resultsType = {
+      positions: filterArray(newPoints, skipIndices, 3)
     };
     if (objectIds && objectIds.length > 0) {
       results.objectIds = filterArray(objectIds, skipIndices, 1);
@@ -146,9 +149,9 @@ export class SnapFeatures {
   snapLines = options => {
     const {
       positions,
-      pathIndices = null,
+      pathIndices,
       coordLength = 2,
-      objectIds = null
+      objectIds
     }: {
       positions: FloatArray;
       pathIndices?: Int32Array;
