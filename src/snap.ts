@@ -49,24 +49,42 @@ export function handleLineString(
   line: Point[],
   index: Flatbush,
   triangles: FloatArray
-) {
-  let coordsWithZ = [];
+): FloatArray {
+  const coordLength = 3;
+  const nCoords = line.length;
+  const newPositions = new Float32Array(nCoords * coordLength);
+  let positionIndex = 0;
 
   // Loop over each coordinate pair
-  for (let i = 0; i < line.length - 1; i++) {
+  for (let i = 0; i < nCoords - 1; i++) {
     const start = line[i];
     const end = line[i + 1];
-    const sorted = handleLineSegment([start, end], index, triangles);
 
+    // Find z value of beginning endpoint of line segment
     const newStart = handlePoint(start, index, triangles);
-    if (newStart) coordsWithZ.push(newStart);
-    coordsWithZ.push.apply(sorted);
+    if (newStart) {
+      newPositions.set(newStart, positionIndex * coordLength);
+      positionIndex++;
+    }
+
+    // Find intermediate points of line segment
+    const sorted = handleLineSegment([start, end], index, triangles);
+    if (sorted) {
+      newPositions.set(sorted.flat(), positionIndex * coordLength);
+      positionIndex += sorted.length;
+    }
   }
 
-  const endPoint = line.slice(-1)[0];
+  // Find z value of endpoint of polyline
+  const endPoint = line[line.length - 1];
   const newEnd = handlePoint(endPoint, index, triangles);
-  if (newEnd) coordsWithZ.push(newEnd);
-  return coordsWithZ;
+  if (newEnd) {
+    newPositions.set(newEnd, positionIndex * coordLength);
+    positionIndex++;
+  }
+
+  // Return view on filled elements
+  return newPositions.subarray(0, positionIndex * coordLength);
 }
 
 export function handleLineSegment(lineSegment, index, triangles) {
