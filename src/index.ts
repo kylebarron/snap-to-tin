@@ -7,6 +7,11 @@ import { handlePoint, handleLineString } from "./snap";
 import { filterArray } from "./util";
 import { FloatArray, IntegerArray, TypedArray } from "./types";
 
+interface snapPointsResultType {
+  positions: TypedArray;
+  objectIds?: TypedArray;
+}
+
 export class SnapFeatures {
   index: Flatbush;
   triangles: FloatArray;
@@ -132,11 +137,7 @@ export class SnapFeatures {
     }
 
     // Remove points that were allocated but not filled
-    interface resultsType {
-      positions: TypedArray;
-      objectIds?: TypedArray;
-    }
-    const results: resultsType = {
+    const results: snapPointsResultType = {
       positions: filterArray(newPoints, skipIndices, 3)
     };
     if (objectIds && objectIds.length > 0) {
