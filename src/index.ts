@@ -1,11 +1,16 @@
-import { getType } from "@turf/invariant";
-import bboxClip from "@turf/bbox-clip";
 import lineclip from "lineclip";
 import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
 import { filterArray } from "./util";
-import { FloatArray, IntegerArray, TypedArray, Point } from "./types";
+import {
+  FloatArray,
+  IntegerArray,
+  TypedArray,
+  Point,
+  PointZ,
+  LineSegment
+} from "./types";
 
 interface snapPointsResultType {
   positions: TypedArray;
@@ -46,59 +51,75 @@ export default class SnapFeatures {
     const newFeatures: any[] = [];
 
     for (const feature of features) {
-      const geometryType = getType(feature);
+      const geometryType = feature.geometry.type;
 
       if (geometryType === "Point") {
         const coord = feature.geometry.coordinates;
+        const newCoord = this._handlePoint(coord);
 
-        if (this.bounds && this.bounds.length === 4) {
-          // Make sure coordinate is within bounds
-          if (
-            coord[0] < this.bounds[0] ||
-            coord[0] > this.bounds[2] ||
-            coord[1] < this.bounds[1] ||
-            coord[1] > this.bounds[3]
-          ) {
-            continue;
-          }
+        if (!newCoord) continue;
+
+        feature.geometry.coordinates = newCoord;
+        newFeatures.push(feature);
+      } else if (geometryType === "MultiPoint") {
+        const newCoords: PointZ[] = [];
+        for (const point of feature.geometry.coordinates) {
+          const newPoint = this._handlePoint(point);
+          if (newPoint) newCoords.push(newPoint);
         }
 
-        const newPoint = handlePoint(coord, this.index, this.triangles);
-        if (!newPoint) continue;
-        feature.geometry.coordinates = newPoint;
+        feature.geometry.coordinates = newCoords;
         newFeatures.push(feature);
       } else if (geometryType === "LineString") {
-        // Instantiate clippedFeature in case bounds is null
-        let clippedFeature = feature;
+        // An array of one or more LineStrings
+        const newLines = this._handleLine(feature.geometry.coordinates);
+        if (!newLines) continue;
 
-        // Clip to box
-        if (this.bounds && this.bounds.length === 4) {
-          clippedFeature = bboxClip(feature, this.bounds);
+        // Single LineString
+        if (newLines.length === 1) {
+          feature.geometry.coordinates = newLines[0];
+        } else {
+          feature.geometry.type = "MultiLineString";
+          feature.geometry.coordinates = newLines;
         }
-
-        const coords = clippedFeature.geometry.coordinates;
-
-        // If empty, continue
-        if (coords.length === 0) {
-          continue;
-        }
-
-        // TODO: support multilinestrings
-        // Note that the clipped Feature can now be a MultiLineString
-        if (getType(clippedFeature) === "MultiLineString") {
-          continue;
-        }
-
-        clippedFeature.geometry.coordinates = handleLineString(
-          coords,
-          this.index,
-          this.triangles
-        );
-        newFeatures.push(clippedFeature);
+        newFeatures.push(feature);
       }
     }
 
     return newFeatures;
+  };
+
+  _handlePoint = (coord: Point) => {
+    if (this.bounds && this.bounds.length === 4) {
+      // Make sure coordinate is within bounds
+      if (
+        coord[0] < this.bounds[0] ||
+        coord[0] > this.bounds[2] ||
+        coord[1] < this.bounds[1] ||
+        coord[1] > this.bounds[3]
+      ) {
+        return;
+      }
+    }
+
+    return handlePoint(coord, this.index, this.triangles);
+  };
+
+  _handleLine = (coords: Point[]) => {
+    let clippedLine: Point[][] = [coords];
+    if (this.bounds && this.bounds.length === 4) {
+      clippedLine = lineclip(coords, this.bounds);
+      if (clippedLine.length === 0) return;
+    }
+
+    const newLineSegments: Point[][] = [];
+    for (const lineSegment of clippedLine) {
+      newLineSegments.push(
+        handleLineString(lineSegment, this.index, this.triangles)
+      );
+    }
+
+    return newLineSegments;
   };
 
   // Snap typedArray of points

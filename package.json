@@ -26,14 +26,10 @@
   },
   "homepage": "https://github.com/kylebarron/snap-to-tin#readme",
   "dependencies": {
-    "@turf/bbox-clip": "^6.0.3",
-    "@turf/helpers": "^6.1.4",
-    "@turf/invariant": "^6.1.2",
     "@types/flatbush": "^3.1.0",
     "flatbush": "^3.2.0",
     "lineclip": "^1.1.5",
-    "lodash.orderby": "^4.6.0",
-    "lodash.uniqby": "^4.7.0"
+    "lodash.orderby": "^4.6.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.8.3",
