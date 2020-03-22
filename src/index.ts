@@ -18,7 +18,7 @@ interface snapLinesResultType {
   pathIndices: TypedArray;
 }
 
-export class SnapFeatures {
+export default class SnapFeatures {
   index: Flatbush;
   triangles: FloatArray;
   bounds: [number, number, number, number] | null;
@@ -41,7 +41,8 @@ export class SnapFeatures {
   }
 
   // Snap arbitrary GeoJSON features
-  snapFeatures = (features: any[]) => {
+  snapFeatures = options => {
+    const { features }: { features: any[] } = options;
     const newFeatures: any[] = [];
 
     for (const feature of features) {
