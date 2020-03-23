@@ -18,5 +18,8 @@ install:
   - npm install
 
 script:
+  # Test compiling ts
+  - npm run build
+  # Run tests
   - npm test
   # - npm run coveralls
