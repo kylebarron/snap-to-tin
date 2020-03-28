@@ -151,44 +151,28 @@ export default class SnapFeatures {
       objectIds?: IntegerArray;
     } = options;
     const newPoints = new Float32Array((positions.length / coordLength) * 3);
-    const skipIndices: number[] = [];
+    const newObjectIds = new Uint32Array((objectIds && objectIds.length) || 0);
+    let pointIndex = 0;
 
     // Iterate over vertex index
     for (let i = 0; i < positions.length / coordLength; i++) {
       const coord = positions.subarray(i * coordLength, (i + 1) * coordLength);
+      const newPoint = this._handlePoint(coord);
 
-      if (this.bounds && this.bounds.length === 4) {
-        // If outside bounds, skip
-        if (
-          coord[0] < this.bounds[0] ||
-          coord[0] > this.bounds[2] ||
-          coord[1] < this.bounds[1] ||
-          coord[1] > this.bounds[3]
-        ) {
-          skipIndices.push(i);
-          continue;
+      if (newPoint) {
+        newPoints.set(newPoint, pointIndex * 3);
+        if (objectIds) {
+          newObjectIds[pointIndex] = objectIds[i];
         }
+        pointIndex++;
       }
-
-      const newPoint = handlePoint(coord, this.index, this.triangles);
-      if (!newPoint) {
-        console.log("point not found");
-        skipIndices.push(i);
-        continue;
-      }
-
-      // Fill point into array
-      newPoints.set(newPoint, i * coordLength);
     }
 
-    // Remove points that were allocated but not filled
-    const results: snapPointsResultType = {
-      positions: filterArray(newPoints, skipIndices, 3)
+    // Filter array to size of filled points
+    return {
+      positions: newPoints.subarray(0, pointIndex * 3),
+      objectIds: objectIds
     };
-    if (objectIds && objectIds.length > 0) {
-      results.objectIds = filterArray(objectIds, skipIndices, 1);
-    }
-    return results;
   };
 
   // Snap typedArray of lines
