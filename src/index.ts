@@ -117,6 +117,7 @@ export default class SnapFeatures {
   };
 
   _handleLine = (coords: Point[]) => {
+    // Clip line to box
     let clippedLine: Point[][] = [coords];
     if (this.bounds && this.bounds.length === 4) {
       clippedLine = lineclip(coords, this.bounds);
@@ -183,18 +184,8 @@ export default class SnapFeatures {
       objectIds?: Uint16Array;
     } = options;
 
-    let data: snapLinesResultType = {
-      positions: new Float32Array((positions.length / coordLength) * 3),
-      pathIndices: new Int32Array((pathIndices && pathIndices.length) || 2),
-      objectIds: objectIds
-        ? new Int32Array((positions.length / coordLength) * 3)
-        : new Int32Array(0)
-    };
-
-    let index = {
-      positions: 0,
-      pathIndices: 0
-    };
+    const newLines: LineSegment[] = [];
+    const newObjectIds: number[] = [];
 
     // Loop over each LineString, as defined by pathIndices
     const loopIndices = pathIndices ? pathIndices : [0, positions.length];
@@ -208,44 +199,45 @@ export default class SnapFeatures {
         line.push(positions.subarray(j * coordLength, (j + 1) * coordLength));
       }
 
-      // Clip line to box
-      const clippedLine: Point[] = lineclip(line, this.bounds);
+      const newLineSegments = this._handleLine(line);
+      if (!newLineSegments) continue;
 
-      // If empty, continue
-      if (clippedLine.length === 0) {
-        continue;
+      const objectId = objectIds && objectIds[i];
+      for (const newLineSegment of newLineSegments) {
+        newLines.push(newLineSegment);
+
+        if (objectId) newObjectIds.push(objectId);
       }
-
-      const newCoords = handleLineString(
-        clippedLine,
-        this.index,
-        this.triangles
-      );
-      const nNewCoords = newCoords.length / 3;
-
-      // Fill positions
-      data.positions.set(newCoords, index.positions * coordLength);
-
-      // Fill objectIds
-      if (objectIds) {
-        // objectId should be the same for all vertices within a single
-        // LineString
-        const objectId = objectIds[index.positions];
-        data.objectIds.set(new Int16Array(nNewCoords).fill(objectId));
-      }
-
-      // Fill pathIndices
-      data.pathIndices[index.pathIndices] = index.positions;
-
-      // Increment
-      index.positions += nNewCoords;
-      index.pathIndices++;
     }
 
-    // Resize arrays given total position count
-    data.positions = data.positions.subarray(0, index.positions * 3);
-    data.objectIds = data.objectIds.subarray(0, index.positions);
-    data.pathIndices = data.pathIndices.subarray(0, index.pathIndices);
+    // Create binary arrays
+    const newPositions: number[] = [];
+    const newPathIndices: number[] = [];
+    const newNewObjectIds: number[] = [];
+
+    let positionIndex = 0;
+    for (let i = 0; i < newLines.length; i++) {
+      const line = newLines[i];
+      newPositions.push.apply(line);
+      newPathIndices.push(positionIndex);
+
+      if (objectIds) {
+        for (let j = 0; j < line.length; j++) {
+          newNewObjectIds.push(newObjectIds[i]);
+        }
+      }
+
+      positionIndex += line.length;
+    }
+
+    // Backfill last index
+    newPathIndices.push(newPositions.length);
+
+    let data: snapLinesResultType = {
+      positions: Float32Array.from(newPositions),
+      pathIndices: Uint32Array.from(newPathIndices),
+      objectIds: Uint32Array.from(newNewObjectIds)
+    };
     return data;
   };
 }
