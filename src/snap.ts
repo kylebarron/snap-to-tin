@@ -45,15 +45,25 @@ export function handlePoint(
 }
 
 // Add coordinates for LineString
+//
+// Note: you can't instantiate a new TypedArray with the number of
+// coordinates, because you don't know how many edges you'll be
+// crossing on the mesh
+//
+// For now I'll just return an array of arrays of coordinates
+//
+// But keep in mind you could do a two-pass approach:
+// First loop over each line segment, searching the rtree index for each.
+// Create an array of arrays of indexes that correspond to each segment.
+// That gives you an upper bound to the number of triangles, so you could create
+// a TypedArray using that upper bound
 export function handleLineString(
   line: Point[],
   index: Flatbush,
   triangles: FloatArray
-): FloatArray {
-  const coordLength = 3;
+): PointZ[] {
   const nCoords = line.length;
-  const newPositions = new Float32Array(nCoords * coordLength);
-  let positionIndex = 0;
+  const newCoords: PointZ[] = [];
 
   // Loop over each coordinate pair
   for (let i = 0; i < nCoords - 1; i++) {
@@ -63,16 +73,14 @@ export function handleLineString(
     // Find z value of beginning endpoint of line segment
     const newStart = handlePoint(start, index, triangles);
     if (newStart) {
-      newPositions.set(newStart, positionIndex * coordLength);
-      positionIndex++;
+      newCoords.push(newStart);
     }
 
     // Find intermediate points of line segment
     const lineZ = handleLineSegment([start, end], index, triangles);
     if (lineZ) {
       for (const coord of lineZ) {
-        newPositions.set(coord, positionIndex * coordLength);
-        positionIndex++;
+        newCoords.push(coord);
       }
     }
   }
@@ -81,12 +89,11 @@ export function handleLineString(
   const endPoint = line[line.length - 1];
   const newEnd = handlePoint(endPoint, index, triangles);
   if (newEnd) {
-    newPositions.set(newEnd, positionIndex * coordLength);
-    positionIndex++;
+    newCoords.push(newEnd);
   }
 
   // Return view on filled elements
-  return newPositions.subarray(0, positionIndex * coordLength);
+  return newCoords;
 }
 
 // Find intersections between line segment and triangle edges
