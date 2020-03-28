@@ -2,20 +2,7 @@ import lineclip from "lineclip";
 import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
-import {
-  FloatArray,
-  IntegerArray,
-  TypedArray,
-  Point,
-  PointZ,
-  LineSegment
-} from "./types";
-
-interface snapLinesResultType {
-  positions: TypedArray;
-  objectIds: TypedArray;
-  pathIndices: TypedArray;
-}
+import { FloatArray, IntegerArray, Point, PointZ, LineSegment } from "./types";
 
 export default class SnapFeatures {
   index: Flatbush;
@@ -139,14 +126,16 @@ export default class SnapFeatures {
     const {
       positions,
       coordLength = 2,
-      objectIds
+      featureIds
     }: {
       positions: FloatArray;
       coordLength: number;
-      objectIds?: IntegerArray;
+      featureIds?: IntegerArray;
     } = options;
     const newPoints = new Float32Array((positions.length / coordLength) * 3);
-    const newObjectIds = new Uint32Array((objectIds && objectIds.length) || 0);
+    const newFeatureIds = new Uint32Array(
+      (featureIds && featureIds.length) || 0
+    );
     let pointIndex = 0;
 
     // Iterate over vertex index
@@ -156,8 +145,8 @@ export default class SnapFeatures {
 
       if (newPoint) {
         newPoints.set(newPoint, pointIndex * 3);
-        if (objectIds) {
-          newObjectIds[pointIndex] = objectIds[i];
+        if (featureIds) {
+          newFeatureIds[pointIndex] = featureIds[i];
         }
         pointIndex++;
       }
@@ -166,7 +155,7 @@ export default class SnapFeatures {
     // Filter array to size of filled points
     return {
       positions: newPoints.subarray(0, pointIndex * 3),
-      objectIds: objectIds
+      featureIds: featureIds
     };
   };
 
@@ -176,16 +165,16 @@ export default class SnapFeatures {
       positions,
       pathIndices,
       coordLength = 2,
-      objectIds
+      featureIds
     }: {
       positions: FloatArray;
       pathIndices?: Int32Array;
       coordLength: number;
-      objectIds?: Uint16Array;
+      featureIds?: Uint16Array;
     } = options;
 
     const newLines: LineSegment[] = [];
-    const newObjectIds: number[] = [];
+    const newFeatureIds: number[] = [];
 
     // Loop over each LineString, as defined by pathIndices
     const loopIndices = pathIndices ? pathIndices : [0, positions.length];
@@ -202,18 +191,18 @@ export default class SnapFeatures {
       const newLineSegments = this._handleLine(line);
       if (!newLineSegments) continue;
 
-      const objectId = objectIds && objectIds[i];
+      const objectId = featureIds && featureIds[i];
       for (const newLineSegment of newLineSegments) {
         newLines.push(newLineSegment);
 
-        if (objectId) newObjectIds.push(objectId);
+        if (objectId) newFeatureIds.push(objectId);
       }
     }
 
     // Create binary arrays
     const newPositions: number[] = [];
     const newPathIndices: number[] = [];
-    const newNewObjectIds: number[] = [];
+    const newNewFeatureIds: number[] = [];
 
     let positionIndex = 0;
     for (let i = 0; i < newLines.length; i++) {
@@ -221,9 +210,9 @@ export default class SnapFeatures {
       newPositions.push.apply(line);
       newPathIndices.push(positionIndex);
 
-      if (objectIds) {
+      if (featureIds) {
         for (let j = 0; j < line.length; j++) {
-          newNewObjectIds.push(newObjectIds[i]);
+          newNewFeatureIds.push(newFeatureIds[i]);
         }
       }
 
@@ -233,11 +222,10 @@ export default class SnapFeatures {
     // Backfill last index
     newPathIndices.push(newPositions.length);
 
-    let data: snapLinesResultType = {
+    return {
       positions: Float32Array.from(newPositions),
       pathIndices: Uint32Array.from(newPathIndices),
-      objectIds: Uint32Array.from(newNewObjectIds)
+      featureIds: Uint32Array.from(newNewFeatureIds)
     };
-    return data;
   };
 }

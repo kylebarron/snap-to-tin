@@ -86,13 +86,13 @@ Snap a TypedArray of points to the TIN.
   which are the positions of the triangles of the TIN. These are the positions
   of `Point`s on the TIN.
 
-- **`objectIds`**: Optional, a flat TypedArray with `objectIds`, one per vertex.
-  If provided, a similar TypedArray will be returned. Since some input points
-  can be omitted from the output (e.g. if outside the bounds of the TIN), this
-  helps to keep track of which snapped point has which properties. This must
-  be the same length as the number of vertices within `positions`. So if
-  `positions` holds five 2D coordinates, the length of `positions` should be
-  10 and the length of `objectIds` should be 5.
+- **`featureIds`**: Optional, a flat TypedArray with `featureIds`, one per
+  vertex. If provided, a similar TypedArray will be returned. Since some input
+  points can be omitted from the output (e.g. if outside the bounds of the TIN),
+  this helps to keep track of which snapped point has which properties. This
+  must be the same length as the number of vertices within `positions`. So if
+  `positions` holds five 2D coordinates, the length of `positions` should be 10
+  and the length of `featureIds` should be 5.
 
 Returns:
 
@@ -100,8 +100,8 @@ Returns:
 {
   // A flat TypedArray containing 3D coordinates for each point
   positions: TypedArray,
-  // If provided as input, a mutated objectIds array for each snapped vertex
-  objectIds: TypedArray,
+  // If provided as input, a mutated featureIds array for each snapped vertex
+  featureIds: TypedArray,
 }
 ```
 
@@ -120,13 +120,13 @@ Snap a TypedArray of lines to the TIN.
   each, `pathIndices` should be `[0, 2, 5, 9]`. Note, this must have length `n + 1`, where `n` is the number of vertices. If not provided, assumed the entire
   `positions` array constitutes a single `LineString`.
 
-- **`objectIds`**: Optional, a flat TypedArray with `objectIds`, one per vertex.
-  If provided, a similar TypedArray will be returned. Since some input lines
-  can be omitted from the output (e.g. if outside the bounds of the TIN), this
-  helps to keep track of which snapped vertex has which properties. This must
-  be the same length as the number of vertices within `positions`. So if
-  `positions` holds five 2D coordinates, the length of `positions` should be
-  10 and the length of `objectIds` should be 5.
+- **`featureIds`**: Optional, a flat TypedArray with `featureIds`, one per
+  vertex. If provided, a similar TypedArray will be returned. Since some input
+  lines can be omitted from the output (e.g. if outside the bounds of the TIN),
+  this helps to keep track of which snapped vertex has which properties. This
+  must be the same length as the number of vertices within `positions`. So if
+  `positions` holds five 2D coordinates, the length of `positions` should be 10
+  and the length of `featureIds` should be 5.
 
 Returns:
 
@@ -136,8 +136,8 @@ Returns:
   positions: TypedArray,
   // A flat TypedArray with indices of where each snapped `LineString` starts
   pathIndices: TypedArray,
-  // If provided as input, a mutated objectIds array for each snapped vertex
-  objectIds: TypedArray,
+  // If provided as input, a mutated featureIds array for each snapped vertex
+  featureIds: TypedArray,
 }
 ```
 
