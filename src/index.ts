@@ -2,7 +2,6 @@ import lineclip from "lineclip";
 import Flatbush from "flatbush";
 import { constructRTree } from "./rtree";
 import { handlePoint, handleLineString } from "./snap";
-import { filterArray } from "./util";
 import {
   FloatArray,
   IntegerArray,
@@ -11,11 +10,6 @@ import {
   PointZ,
   LineSegment
 } from "./types";
-
-interface snapPointsResultType {
-  positions: TypedArray;
-  objectIds?: TypedArray;
-}
 
 interface snapLinesResultType {
   positions: TypedArray;
