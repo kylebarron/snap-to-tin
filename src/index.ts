@@ -83,6 +83,23 @@ export default class SnapFeatures {
           feature.geometry.coordinates = newLines;
         }
         newFeatures.push(feature);
+      } else if (geometryType === "MultiLineString") {
+        const newCoords: PointZ[][] = [];
+
+        for (const line of feature.geometry.coordinates) {
+          const newLines = this._handleLine(line);
+          if (!newLines) continue;
+
+          // Single LineString
+          if (newLines.length === 1) {
+            newCoords.push(newLines[0]);
+          } else {
+            newCoords.push.apply(newLines);
+          }
+        }
+
+        feature.geometry.coordinates = newCoords;
+        newFeatures.push(feature);
       }
     }
 
