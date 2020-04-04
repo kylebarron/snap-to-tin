@@ -65,7 +65,9 @@ Admits an object with the following keys:
 
 - **`indices`**: a flat TypedArray with triples of indices referring to `positions` of the triangles that make up the TIN. Each triple refers to a triangle face. So `[1, 3, 4, ...]` would mean that the second, fourth, and fifth (since zero-indexed) set of coordinates in `positions` constitute a triangle face.
 - **`positions`**: a flat TypedArray with x, y, z coordinates of the triangles. So `[0.25, 0.5, 625, ...]` would mean that the first position, i.e. `0` in `indices`, has position `x=0.25`, `y=0.5`, `z=625` in the given coordinate space.
-- **`bounds`**: an array of `[minX, minY, maxX, maxY]` to be used for clipping features. This is useful with features generated from vector tiles, since vector tiles usually have buffer outside the geographic extent it represents. But it's not possible to snap features outside the extent of the terrain mesh. Default: `null`.
+- **`bounds`**: (optional) an array of `[minX, minY, maxX, maxY]` to be used for clipping features. This is used to clip vector features, since heights cannot be found for positions outside the extent defined by the `positions` array. If provided, `bounds` will be intersected with the maximal bounds from the `positions` array. Default: maximum extent of `positions`
+
+    This is especially useful with features generated from vector tiles, since vector tiles usually have buffer outside the geographic extent it represents.
 
 ### `SnapFeatures.snapFeatures()`
 

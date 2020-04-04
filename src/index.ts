@@ -7,23 +7,30 @@ import { FloatArray, IntegerArray, Point, PointZ, LineSegment } from "./types";
 export default class SnapFeatures {
   index: Flatbush;
   triangles: FloatArray;
-  bounds: [number, number, number, number] | null;
+  bounds: [number, number, number, number];
 
   constructor(options) {
     const {
       indices,
       positions,
-      bounds = null
+      bounds = [-Infinity, -Infinity, Infinity, Infinity]
     }: {
       indices: Int32Array;
       positions: FloatArray;
-      bounds: [number, number, number, number] | null;
+      bounds: [number, number, number, number];
     } = options;
 
     const { index, triangles } = constructRTree(indices, positions);
     this.index = index;
     this.triangles = triangles;
-    this.bounds = bounds;
+
+    // Intersection of provided bounds and rtree bounds
+    this.bounds = [
+      Math.max(bounds[0], index.minX),
+      Math.max(bounds[1], index.minY),
+      Math.min(bounds[2], index.maxX),
+      Math.min(bounds[3], index.maxY)
+    ];
   }
 
   // Snap arbitrary GeoJSON features
