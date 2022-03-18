@@ -19,6 +19,11 @@
     "vector-tiles",
     "triangular-mesh"
   ],
+  "files": [
+    "src/",
+    "dist/",
+    "lib/"
+  ],
   "author": "Kyle Barron (https://kylebarron.dev)",
   "license": "MIT",
   "bugs": {
@@ -38,6 +43,7 @@
     "@types/jest": "^25.1.4",
     "jest": "^25.1.0",
     "rollup": "^2.0.2",
-    "rollup-plugin-terser": "^5.2.0"
+    "rollup-plugin-terser": "^5.2.0",
+    "typescript": "^4.6.2"
   }
 }
