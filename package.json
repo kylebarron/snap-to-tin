@@ -1,6 +1,6 @@
 {
   "name": "@kylebarron/snap-to-tin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Snap vector features to the faces of a triangulated irregular network (TIN).",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
